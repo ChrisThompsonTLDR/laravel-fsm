@@ -1,0 +1,70 @@
+{
+  "name": "christhompsontldr/laravel-fsm",
+  "description": "A robust, plug-and-play Finite State Machine (FSM) package for Laravel applications.",
+  "keywords": [
+    "laravel",
+    "fsm",
+    "state machine",
+    "php",
+    "finite state machine"
+  ],
+  "homepage": "https://github.com/christhompsontldr/laravel-fsm",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Chris Thompson",
+      "email": "chris.thompson@tldr.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^8.3|^8.4",
+    "illuminate/support": "^12.0",
+    "illuminate/database": "^12.0",
+    "yorcreative/laravel-argonaut-dto": "^1.2",
+    "hirethunk/verbs": "^0.7"
+  },
+  "require-dev": {
+    "glhd/bits": "^0.6.1",
+    "larastan/larastan": "^3.4.2",
+    "laravel/pint": "^1.22",
+    "mockery/mockery": "^1.6.12",
+    "orchestra/testbench": "^10.4",
+    "pestphp/pest": "^4.0",
+    "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^12.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "Fsm\\": "src/Fsm/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Fsm\\FsmServiceProvider"
+      ]
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "scripts": {
+        "test": "php -d memory_limit=2G ./vendor/bin/pest",
+        "test-parallel": "php -d memory_limit=2G ./vendor/bin/pest --parallel",
+        "test-unit": "php -d memory_limit=2G ./vendor/bin/pest tests/Unit",
+        "test-feature": "php -d memory_limit=2G ./vendor/bin/pest tests/Feature",
+    "lint": "./vendor/bin/pint",
+    "analyse": "./vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=2G"
+  }
+}

@@ -1,0 +1,6 @@
+.cursor/*
+!.cursor/rules/
+vendor
+.phpunit.cache
+database/testbench.sqlite
+laravel-fsm.code-workspace

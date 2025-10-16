@@ -1,0 +1,50 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{enumNamespace}};
+
+use Fsm\Contracts\FsmStateEnum;
+
+/**
+ * States available for the {{fsmEnumClass}} state machine.
+ *
+ * Add additional cases as your workflow requires.
+ */
+enum {{fsmEnumClass}}: string implements FsmStateEnum
+{
+    /** Initial state */
+    case {{enumStateOne}} = '{{enumStateOneLower}}';
+
+    /** Example next state */
+    case {{enumStateTwo}} = '{{enumStateTwoLower}}';
+    // Add more states here as needed
+
+    /**
+     * Get the human-readable display name for the state.
+     *
+     * @return string
+     */
+    public function displayName(): string
+    {
+        return match ($this) {
+            self::{{enumStateOne}} => '{{enumStateOneFormatted}}',
+            self::{{enumStateTwo}} => '{{enumStateTwoFormatted}}',
+            // default => ucfirst(str_replace('_', ' ', $this->value)), // Generic fallback
+        };
+    }
+
+    /**
+     * Get an icon representation for the state (e.g., for UI).
+     *
+     * @return string
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::{{enumStateOne}} => 'icon-{{enumStateOneLower}}',
+            self::{{enumStateTwo}} => 'icon-{{enumStateTwoLower}}',
+            // default => 'icon-default',
+        };
+    }
+} 

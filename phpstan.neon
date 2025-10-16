@@ -1,0 +1,26 @@
+includes:
+    - ./vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - src
+    level: 8
+    excludePaths:
+        - tests/*
+
+    # Bootstrap file for consistent cache configuration during analysis
+    bootstrapFiles:
+        - phpstan-bootstrap.php
+
+    # Laravel specific configurations
+    checkModelProperties: true
+    checkOctaneCompatibility: true
+    treatPhpDocTypesAsCertain: false
+    reportUnmatchedIgnoredErrors: false
+
+    # Ignore specific errors for external dependencies and enum properties
+    ignoreErrors:
+        - '#Fsm\\Contracts\\FsmStateEnum#'
+        - '#Call to an undefined static method Thunk\\Verbs\\Facades\\Verbs::.*#'
+        - '#Trait Fsm\\Traits\\HasFsm is used zero times and is not analysed#'
+        - '#Fsm\\Services\\FsmEngineService::#'

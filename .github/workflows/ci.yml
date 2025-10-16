@@ -1,0 +1,30 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: Pint
+            run: vendor/bin/pint --test
+          - name: Larastan
+            run: vendor/bin/phpstan analyse -c phpstan.neon
+          - name: Pest
+            run: vendor/bin/pest
+    name: ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - uses: ramsey/composer-install@v3
+        with:
+          composer-options: --no-progress
+      - run: ${{ matrix.run }}

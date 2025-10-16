@@ -1,0 +1,53 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }};
+
+use {{modelFqnPlaceholder}};
+use {{enumNamespace}}\{{fsmEnumClass}};
+use Fsm\Contracts\FsmDefinition;
+use Fsm\FsmBuilder;
+use Fsm\TransitionBuilder;
+
+class {{ class }} implements FsmDefinition
+{
+    /**
+     * Defines the FSM transitions and states.
+     *
+     * @param FsmBuilder $builder
+     * @return void
+     */
+    public static function defineFsm(FsmBuilder $builder): void
+    {
+        $builder->for({{modelClassPlaceholder}}::class, '{{statusColumnPlaceholder}}')
+            ->initial({{fsmEnumClass}}::{{enumStateOne}})
+
+            // Define states and their specific onEntry/onExit callbacks
+            ->state({{fsmEnumClass}}::{{enumStateOne}}, function (TransitionBuilder $stateBuilder) {
+                // $stateBuilder->onEntry([SomeService::class, 'handleEntryToStateOne']);
+                // $stateBuilder->onExit([SomeService::class, 'handleExitFromStateOne']);
+            })
+            ->state({{fsmEnumClass}}::{{enumStateTwo}})
+            // Add more states as needed
+            // ->state({{fsmEnumClass}}::SomeOtherState)
+
+            // Define transitions
+            ->transition('Example Transition to {{enumStateTwo}}')
+                ->from({{fsmEnumClass}}::{{enumStateOne}})
+                ->to({{fsmEnumClass}}::{{enumStateTwo}})
+                ->event('example_event_to_trigger_transition')
+                // ->guard([GuardService::class, 'canTransitionToStateTwo'])
+                // ->action([ActionService::class, 'performActionOnTransition'])
+                ->add()
+            ;
+
+        // Add more transitions as needed
+        // $builder->for({{modelClassPlaceholder}}::class, '{{statusColumnPlaceholder}}')
+        //     ->transition('Another Transition')
+        //         ->from({{fsmEnumClass}}::{{enumStateTwo}})
+        //         ->to({{fsmEnumClass}}::SomeOtherState)
+        //         ->event('another_event')
+        //         ->add();
+    }
+} 
