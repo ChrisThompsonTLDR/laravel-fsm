@@ -19,10 +19,11 @@
   ],
   "require": {
     "php": "^8.3|^8.4",
-    "illuminate/support": "^12.0",
+    "hirethunk/verbs": "^0.7",
     "illuminate/database": "^12.0",
-    "yorcreative/laravel-argonaut-dto": "^1.2",
-    "hirethunk/verbs": "^0.7"
+    "illuminate/support": "^12.0",
+    "laravel/framework": "^12.0",
+    "yorcreative/laravel-argonaut-dto": "^1.2"
   },
   "require-dev": {
     "glhd/bits": "^0.6.1",
