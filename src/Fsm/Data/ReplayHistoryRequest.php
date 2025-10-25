@@ -32,23 +32,22 @@ class ReplayHistoryRequest extends Dto
             // First prepare attributes to convert snake_case to camelCase
             $prepared = static::prepareAttributes($modelClass);
 
-            // Validate array-based instantiation has required fields (using camelCase keys)
-            if (! array_key_exists('modelClass', $prepared) || ! is_string($prepared['modelClass']) || trim($prepared['modelClass']) === '') {
-                throw new \InvalidArgumentException(
-                    'The modelClass is required and cannot be an empty string.'
-                );
+            // Convert null values to empty strings to avoid TypeError
+            $prepared['modelClass'] = $prepared['modelClass'] ?? '';
+            $prepared['modelId'] = $prepared['modelId'] ?? '';
+            $prepared['columnName'] = $prepared['columnName'] ?? '';
+
+            // Basic validation for array-based construction
+            if (trim($prepared['modelClass']) === '') {
+                throw new \InvalidArgumentException('The modelClass is required and cannot be an empty string.');
             }
 
-            if (! array_key_exists('modelId', $prepared) || ! is_string($prepared['modelId']) || trim($prepared['modelId']) === '') {
-                throw new \InvalidArgumentException(
-                    'The modelId is required and cannot be an empty string.'
-                );
+            if (trim($prepared['modelId']) === '') {
+                throw new \InvalidArgumentException('The modelId is required and cannot be an empty string.');
             }
 
-            if (! array_key_exists('columnName', $prepared) || ! is_string($prepared['columnName']) || trim($prepared['columnName']) === '') {
-                throw new \InvalidArgumentException(
-                    'The columnName is required and cannot be an empty string.'
-                );
+            if (trim($prepared['columnName']) === '') {
+                throw new \InvalidArgumentException('The columnName is required and cannot be an empty string.');
             }
 
             parent::__construct($prepared);
@@ -56,23 +55,22 @@ class ReplayHistoryRequest extends Dto
             return;
         }
 
-        // Validate positional parameters
-        if (! is_string($modelClass) || trim($modelClass) === '') {
-            throw new \InvalidArgumentException(
-                'The modelClass is required and cannot be an empty string.'
-            );
+        // Handle non-associative arrays as positional parameters
+        if (is_array($modelClass) && func_num_args() === 1 && ! static::isAssociative($modelClass)) {
+            throw new \InvalidArgumentException('Non-associative arrays are not supported for array-based construction.');
+        }
+
+        // Basic validation for positional parameters
+        if (is_string($modelClass) && trim($modelClass) === '') {
+            throw new \InvalidArgumentException('The modelClass is required and cannot be an empty string.');
         }
 
         if (trim($modelId) === '') {
-            throw new \InvalidArgumentException(
-                'The modelId is required and cannot be an empty string.'
-            );
+            throw new \InvalidArgumentException('The modelId is required and cannot be an empty string.');
         }
 
         if (trim($columnName) === '') {
-            throw new \InvalidArgumentException(
-                'The columnName is required and cannot be an empty string.'
-            );
+            throw new \InvalidArgumentException('The columnName is required and cannot be an empty string.');
         }
 
         parent::__construct([
@@ -105,8 +103,8 @@ class ReplayHistoryRequest extends Dto
                     }
                 },
             ],
-            'modelId' => ['required', 'string'],
-            'columnName' => ['required', 'string'],
+            'modelId' => ['required', 'string', 'min:1'],
+            'columnName' => ['required', 'string', 'min:1'],
         ];
     }
 }

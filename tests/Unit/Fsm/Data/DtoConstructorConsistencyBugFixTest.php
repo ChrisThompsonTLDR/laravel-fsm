@@ -130,7 +130,7 @@ class DtoConstructorConsistencyBugFixTest extends TestCase
         // Test 1: Empty array (should throw exception)
         $this->expectExceptionForInvalidArray(
             [],
-            'Array-based construction requires a non-empty array.',
+            'Array-based construction requires at least one expected key: success, data, message, error, details',
             'empty array'
         );
 
@@ -288,7 +288,7 @@ class DtoConstructorConsistencyBugFixTest extends TestCase
         $invalidArrays = [
             'empty' => [
                 'array' => [],
-                'message' => 'Array-based construction requires a non-empty array.',
+                'message' => 'Array-based construction requires at least one expected key: success, data, message, error, details',
             ],
             'callable' => [
                 'array' => ['ClassName', 'method'],

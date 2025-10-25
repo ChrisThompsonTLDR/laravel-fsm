@@ -65,7 +65,7 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
 
             public ?\Fsm\Data\TransitionInput $input = null;
 
-            public function testMethod(\Fsm\Data\TransitionInput $input): bool
+            public function test_method(\Fsm\Data\TransitionInput $input): bool
             {
                 $this->called = true;
                 $this->input = $input;
@@ -75,7 +75,7 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
         };
 
         $guard = new TransitionGuard(
-            callable: [$spy, 'testMethod'],
+            callable: [$spy, 'test_method'],
             priority: 1,
             stopOnFailure: false
         );
@@ -116,7 +116,7 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
 
             public ?\Fsm\Data\TransitionInput $input = null;
 
-            public function testMethod(\Fsm\Data\TransitionInput $input): bool
+            public function test_method(\Fsm\Data\TransitionInput $input): bool
             {
                 $this->called = true;
                 $this->input = $input;
@@ -126,7 +126,7 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
         };
 
         $guard = new TransitionGuard(
-            callable: [$spy, 'testMethod'],
+            callable: [$spy, 'test_method'],
             priority: 1,
             stopOnFailure: false
         );

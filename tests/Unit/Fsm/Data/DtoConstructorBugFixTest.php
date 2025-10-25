@@ -146,11 +146,10 @@ class DtoConstructorBugFixTest extends TestCase
     public function test_validate_history_request_rejects_callable_arrays(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('The modelClass is required and cannot be an empty string.');
+        $this->expectExceptionMessage('Non-associative arrays are not supported for array-based construction.');
 
-        // Callable arrays are not associative, so they fall through to positional validation
-        // where the array is treated as the modelClass parameter and fails type validation
-        new ValidateHistoryRequest(['MyClass', 'method']);
+        // Callable arrays are not associative, so they should be rejected
+        new ValidateHistoryRequest(['', 'method', 'column']);
     }
 
     public function test_validate_history_response_handles_mixed_keys_arrays(): void

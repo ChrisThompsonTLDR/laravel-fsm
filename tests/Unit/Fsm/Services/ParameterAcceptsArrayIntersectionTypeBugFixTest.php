@@ -63,13 +63,13 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
         // Create a test function with an intersection type parameter
         $testClass = new class
         {
-            public function testMethod(\Countable&\ArrayAccess $param): void
+            public function test_method(\Countable&\ArrayAccess $param): void
             {
                 // Parameter for testing
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'testMethod');
+        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -97,13 +97,13 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
         // Create a test with an intersection type that arrays don't satisfy
         $testClass = new class
         {
-            public function testMethod(\Countable&\DateTimeInterface $param): void
+            public function test_method(\Countable&\DateTimeInterface $param): void
             {
                 // This intersection cannot be satisfied by an array
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'testMethod');
+        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -130,13 +130,13 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
 
         $testClass = new class
         {
-            public function testMethod(\Traversable&\Countable $param): void
+            public function test_method(\Traversable&\Countable $param): void
             {
                 // Arrays are Traversable and Countable
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'testMethod');
+        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -163,13 +163,13 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
 
         $testClass = new class
         {
-            public function testMethod(\IteratorAggregate&\ArrayAccess $param): void
+            public function test_method(\IteratorAggregate&\ArrayAccess $param): void
             {
                 // Arrays implement both IteratorAggregate and ArrayAccess
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'testMethod');
+        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -192,13 +192,13 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
 
         $testClass = new class
         {
-            public function testMethod(array $param): void
+            public function test_method(array $param): void
             {
                 // Direct array parameter
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'testMethod');
+        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -218,13 +218,13 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
 
         $testClass = new class
         {
-            public function testMethod(mixed $param): void
+            public function test_method(mixed $param): void
             {
                 // Mixed accepts everything including array
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'testMethod');
+        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -244,13 +244,13 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
 
         $testClass = new class
         {
-            public function testMethod(array|string $param): void
+            public function test_method(array|string $param): void
             {
                 // Union type including array
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'testMethod');
+        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -270,13 +270,13 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
 
         $testClass = new class
         {
-            public function testMethod(string|int $param): void
+            public function test_method(string|int $param): void
             {
                 // Union type without array
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'testMethod');
+        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -311,13 +311,13 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
 
         $testClass = new class
         {
-            public function testMethod(string $param): void
+            public function test_method(string $param): void
             {
                 // String parameter
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'testMethod');
+        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -337,13 +337,13 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
 
         $testClass = new class
         {
-            public function testMethod(object $param): void
+            public function test_method(object $param): void
             {
                 // Object parameter
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'testMethod');
+        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -368,13 +368,13 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
         // Test with multiple array-compatible interfaces
         $testClass = new class
         {
-            public function testMethod(\Countable&\ArrayAccess&\Traversable $param): void
+            public function test_method(\Countable&\ArrayAccess&\Traversable $param): void
             {
                 // Arrays implement all three interfaces
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'testMethod');
+        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -402,13 +402,13 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
         // Mix compatible and incompatible types
         $testClass = new class
         {
-            public function testMethod(\Countable&\Stringable $param): void
+            public function test_method(\Countable&\Stringable $param): void
             {
                 // Arrays don't implement Stringable
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'testMethod');
+        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -422,5 +422,3 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
         );
     }
 }
-
-

@@ -138,7 +138,7 @@ class ReplayTransitionsResponseConstructorBugFixTest extends TestCase
     public function test_array_based_construction_fails_with_empty_array(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Array-based construction requires a non-empty array.');
+        $this->expectExceptionMessage('Array-based construction requires at least one expected key: success, data, message, error, details');
 
         new ReplayTransitionsResponse([]);
     }

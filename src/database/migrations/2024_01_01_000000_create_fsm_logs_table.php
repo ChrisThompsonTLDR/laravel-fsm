@@ -15,7 +15,7 @@ return new class extends Migration
             $table->nullableUuidMorphs('subject'); // Links to verb_events.id if a verb was involved
             $table->uuidMorphs('model');
             $table->string('fsm_column');
-            $table->string('from_state');
+            $table->string('from_state')->nullable();
             $table->string('to_state');
             $table->string('transition_event')->nullable(); // User-defined event name that triggered transition
             $table->json('context_snapshot')->nullable();

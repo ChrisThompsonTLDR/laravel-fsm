@@ -41,7 +41,7 @@ class FsmEngineServiceExecuteCallableWithInstanceBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(string $fromState, string $toState, ?ArgonautDTOContract $context = null): array
+            public function test_method(string $fromState, string $toState, ?ArgonautDTOContract $context = null): array
             {
                 return [
                     'fromState' => $fromState,
@@ -57,7 +57,7 @@ class FsmEngineServiceExecuteCallableWithInstanceBugFixTest extends TestCase
             'context' => null,
         ];
 
-        $callable = [$testObject, 'testMethod'];
+        $callable = [$testObject, 'test_method'];
 
         $result = $this->callPrivateMethod('executeCallableWithInstance', $callable, $parameters);
 
@@ -147,7 +147,7 @@ class FsmEngineServiceExecuteCallableWithInstanceBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(
+            public function test_method(
                 string $fromState,
                 int $priority,
                 bool $enabled,
@@ -172,7 +172,7 @@ class FsmEngineServiceExecuteCallableWithInstanceBugFixTest extends TestCase
             'metadata' => ['key' => 'value'],
         ];
 
-        $callable = [$testObject, 'testMethod'];
+        $callable = [$testObject, 'test_method'];
 
         $result = $this->callPrivateMethod('executeCallableWithInstance', $callable, $parameters);
 
@@ -192,7 +192,7 @@ class FsmEngineServiceExecuteCallableWithInstanceBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(string $fromState, string $toState): array
+            public function test_method(string $fromState, string $toState): array
             {
                 return [
                     'fromState' => $fromState,
@@ -207,7 +207,7 @@ class FsmEngineServiceExecuteCallableWithInstanceBugFixTest extends TestCase
             'toState' => 'completed',
         ];
 
-        $callable = [$testObject, 'testMethod'];
+        $callable = [$testObject, 'test_method'];
 
         $result = $this->callPrivateMethod('executeCallableWithInstance', $callable, $parameters);
 
@@ -224,7 +224,7 @@ class FsmEngineServiceExecuteCallableWithInstanceBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(string $fromState): array
+            public function test_method(string $fromState): array
             {
                 return ['fromState' => $fromState];
             }
@@ -236,7 +236,7 @@ class FsmEngineServiceExecuteCallableWithInstanceBugFixTest extends TestCase
             'anotherExtra' => 'also ignored',
         ];
 
-        $callable = [$testObject, 'testMethod'];
+        $callable = [$testObject, 'test_method'];
 
         $result = $this->callPrivateMethod('executeCallableWithInstance', $callable, $parameters);
 
@@ -250,7 +250,7 @@ class FsmEngineServiceExecuteCallableWithInstanceBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(string $fromState, string $toState): array
+            public function test_method(string $fromState, string $toState): array
             {
                 return ['fromState' => $fromState, 'toState' => $toState];
             }
@@ -258,7 +258,7 @@ class FsmEngineServiceExecuteCallableWithInstanceBugFixTest extends TestCase
 
         $parameters = ['fromState' => 'pending']; // Missing toState
 
-        $callable = [$testObject, 'testMethod'];
+        $callable = [$testObject, 'test_method'];
 
         $this->expectException(\ArgumentCountError::class);
 
@@ -340,7 +340,7 @@ class FsmEngineServiceExecuteCallableWithInstanceBugFixTest extends TestCase
 
         $testObject = new class
         {
-            public function testMethod(string $fromState, string $toState, ?ArgonautDTOContract $context = null): array
+            public function test_method(string $fromState, string $toState, ?ArgonautDTOContract $context = null): array
             {
                 return [
                     'fromState' => $fromState,
@@ -358,7 +358,7 @@ class FsmEngineServiceExecuteCallableWithInstanceBugFixTest extends TestCase
             'context' => $context,
         ];
 
-        $callable = [$testObject, 'testMethod'];
+        $callable = [$testObject, 'test_method'];
 
         $result = $this->callPrivateMethod('executeCallableWithInstance', $callable, $parameters);
 
@@ -511,7 +511,7 @@ class FsmEngineServiceExecuteCallableWithInstanceBugFixTest extends TestCase
 
             public array $receivedParams = [];
 
-            public function testMethod(string $param1, int $param2): bool
+            public function test_method(string $param1, int $param2): bool
             {
                 $this->called = true;
                 $this->receivedParams = [$param1, $param2];
@@ -525,7 +525,7 @@ class FsmEngineServiceExecuteCallableWithInstanceBugFixTest extends TestCase
             'param2' => 42,
         ];
 
-        $callable = [$testObject, 'testMethod'];
+        $callable = [$testObject, 'test_method'];
 
         $result = $this->callPrivateMethod('executeCallableWithInstance', $callable, $parameters);
 

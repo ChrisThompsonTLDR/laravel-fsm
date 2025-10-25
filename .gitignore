@@ -4,3 +4,13 @@ vendor
 .phpunit.cache
 database/testbench.sqlite
 laravel-fsm.code-workspace
+
+# Coverage files
+coverage/
+coverage-api/
+coverage-final/
+coverage-runtime/
+coverage.xml
+
+# Local development tools
+bin/

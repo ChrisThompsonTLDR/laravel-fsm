@@ -68,13 +68,13 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(string $param1, int $param2 = 42): string
+            public function test_method(string $param1, int $param2 = 42): string
             {
                 return "Object method called with: {$param1}, {$param2}";
             }
         };
 
-        $callable = [$testObject, 'testMethod'];
+        $callable = [$testObject, 'test_method'];
         $parameters = ['param1' => 'test_value', 'param2' => 123];
 
         // Use reflection to access the private method
@@ -164,13 +164,13 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(string $param1, int $param2): string
+            public function test_method(string $param1, int $param2): string
             {
                 return "Object method called with: {$param1}, {$param2}";
             }
         };
 
-        $callable = [$testObject, 'testMethod'];
+        $callable = [$testObject, 'test_method'];
         $parameters = ['param1' => 'test_value']; // Missing param2
 
         // Use reflection to access the private method
@@ -268,13 +268,13 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(string $param1, int $param2 = 42, string $param3 = 'default'): string
+            public function test_method(string $param1, int $param2 = 42, string $param3 = 'default'): string
             {
                 return "Object method called with: {$param1}, {$param2}, {$param3}";
             }
         };
 
-        $callable = [$testObject, 'testMethod'];
+        $callable = [$testObject, 'test_method'];
         $parameters = ['param1' => 'test_value']; // Only provide param1, others should use defaults
 
         // Use reflection to access the private method
@@ -293,13 +293,13 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(string $param1, int $param2, bool $param3, array $param4): string
+            public function test_method(string $param1, int $param2, bool $param3, array $param4): string
             {
                 return "Object method called with: {$param1}, {$param2}, ".($param3 ? 'true' : 'false').', '.json_encode($param4);
             }
         };
 
-        $callable = [$testObject, 'testMethod'];
+        $callable = [$testObject, 'test_method'];
         $parameters = [
             'param1' => 'test_value',
             'param2' => 123,
@@ -323,13 +323,13 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(): string
+            public function test_method(): string
             {
                 return 'Object method called successfully';
             }
         };
 
-        $callable = [$testObject, 'testMethod'];
+        $callable = [$testObject, 'test_method'];
         $parameters = [];
 
         // Use reflection to access the private method
@@ -349,7 +349,7 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(string $param1, int $param2 = 42): string
+            public function test_method(string $param1, int $param2 = 42): string
             {
                 return "Object method called with: {$param1}, {$param2}";
             }
@@ -361,7 +361,7 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
         $method = new ReflectionMethod($this->service, 'executeObjectMethod');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->service, $testObject, 'testMethod', $parameters);
+        $result = $method->invoke($this->service, $testObject, 'test_method', $parameters);
 
         $this->assertEquals('Object method called with: test_value, 123', $result);
     }
@@ -373,7 +373,7 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(string $param1): string
+            public function test_method(string $param1): string
             {
                 return "Object method called with: {$param1}";
             }
@@ -389,7 +389,7 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
         $method = new ReflectionMethod($this->service, 'executeObjectMethod');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->service, $testObject, 'testMethod', $parameters);
+        $result = $method->invoke($this->service, $testObject, 'test_method', $parameters);
 
         $this->assertEquals('Object method called with: test_value', $result);
     }
@@ -401,7 +401,7 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(string $param1, int $param2, bool $param3): string
+            public function test_method(string $param1, int $param2, bool $param3): string
             {
                 return "Object method called with: {$param1}, {$param2}, ".($param3 ? 'true' : 'false');
             }
@@ -413,7 +413,7 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
         $method = new ReflectionMethod($this->service, 'executeObjectMethod');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->service, $testObject, 'testMethod', $parameters);
+        $result = $method->invoke($this->service, $testObject, 'test_method', $parameters);
 
         $this->assertEquals('Object method called with: test_value, 123, true', $result);
     }
@@ -425,7 +425,7 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(string $param1, int $param2, bool $param3): string
+            public function test_method(string $param1, int $param2, bool $param3): string
             {
                 return "Object method called with: {$param1}, {$param2}, ".($param3 ? 'true' : 'false');
             }
@@ -441,7 +441,7 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
         $method = new ReflectionMethod($this->service, 'executeObjectMethod');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->service, $testObject, 'testMethod', $parameters);
+        $result = $method->invoke($this->service, $testObject, 'test_method', $parameters);
 
         $this->assertEquals('Object method called with: named_value, 456, false', $result);
     }
@@ -453,10 +453,11 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
     {
         $testObject = new class
         {
-            public function testMethod(?string $param1, ?int $param2): string
+            public function test_method(?string $param1, ?int $param2): string
             {
                 $param1Str = $param1 === null ? 'null' : $param1;
                 $param2Str = $param2 === null ? 'null' : (string) $param2;
+
                 return "Object method called with: {$param1Str}, {$param2Str}";
             }
         };
@@ -470,7 +471,7 @@ class FsmEngineServiceCallableExecutionBugFixTest extends TestCase
         $method = new ReflectionMethod($this->service, 'executeObjectMethod');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->service, $testObject, 'testMethod', $parameters);
+        $result = $method->invoke($this->service, $testObject, 'test_method', $parameters);
 
         $this->assertEquals('Object method called with: null, null', $result);
     }

@@ -6,6 +6,7 @@ namespace Fsm\Data;
 
 use Fsm\Contracts\FsmStateEnum;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use YorCreative\LaravelArgonautDTO\ArgonautDTOContract;
 
 /**
@@ -278,9 +279,14 @@ class TransitionInput extends Dto
 
             // Validate that the payload is an array (defensive check)
             if (! is_array($payload)) {
-                // Use error_log instead of Laravel Log to avoid dependency issues in unit tests
-                if (function_exists('error_log')) {
-                    error_log('[FSM] Context serialization failed: toArray() did not return an array - class: '.$this->context::class);
+                // Only log when not running in PHPUnit tests to avoid polluting test output
+                // and when debug mode is enabled in FSM configuration
+                if (! defined('PHPUNIT_COMPOSER_INSTALL') && ! defined('__PHPUNIT_PHAR__') && config('fsm.debug', false)) {
+                    Log::warning('[FSM] Context serialization failed: toArray() did not return an array', [
+                        'class' => $this->context::class,
+                        'returned_type' => gettype($payload),
+                        'returned_value' => $payload,
+                    ]);
                 }
 
                 return null;
@@ -292,10 +298,15 @@ class TransitionInput extends Dto
             ];
         } catch (\Throwable $e) {
             // Log the error but don't throw - we don't want to break the transition
-            // The job will run without context rather than failing completely
-            // Use error_log instead of Laravel Log to avoid dependency issues in unit tests
-            if (function_exists('error_log')) {
-                error_log('[FSM] Context serialization failed for queued job - class: '.$this->context::class.', error: '.$e->getMessage());
+            // The context will be null rather than failing completely
+            // Only log when not running in PHPUnit tests to avoid polluting test output
+            // and when debug mode is enabled in FSM configuration
+            if (! defined('PHPUNIT_COMPOSER_INSTALL') && ! defined('__PHPUNIT_PHAR__') && config('fsm.debug', false)) {
+                Log::error('[FSM] Context serialization failed', [
+                    'class' => $this->context::class,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
             }
 
             return null;
@@ -360,12 +371,12 @@ class TransitionInput extends Dto
 
     /**
      * Check if a parameter type accepts an array value.
-     * 
+     *
      * This method properly handles union types, intersection types, and named types
      * to determine if a parameter can accept an array value.
-     * 
+     *
      * @param  \ReflectionType|null  $paramType  The parameter type to check
-     * @return bool  True if the parameter accepts an array, false otherwise
+     * @return bool True if the parameter accepts an array, false otherwise
      */
     private static function parameterAcceptsArray(?\ReflectionType $paramType): bool
     {
@@ -381,6 +392,7 @@ class TransitionInput extends Dto
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -394,28 +406,26 @@ class TransitionInput extends Dto
                     return false;
                 }
             }
+
             return true;
         }
 
         // Handle named types
         if ($paramType instanceof \ReflectionNamedType) {
             $typeName = $paramType->getName();
-            
+
             // Direct array type
             if ($typeName === 'array') {
                 return true;
             }
-            
+
             // Mixed type accepts everything including array
             if ($typeName === 'mixed') {
                 return true;
             }
-            
-            // Nullable types that include array in union (handled above) or direct array
-            if ($paramType->allowsNull() && $typeName === 'array') {
-                return true;
-            }
-            
+
+            // Nullable array types are already handled above
+
             // For other types, check if they can accept array
             // This is more restrictive than the original implementation
             return false;

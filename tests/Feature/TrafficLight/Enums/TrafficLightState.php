@@ -17,7 +17,7 @@ enum TrafficLightState: string implements FsmStateEnum
 
     public function icon(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Red => '🔴',
             self::Yellow => '🟡',
             self::Green => '🟢',

@@ -155,7 +155,7 @@ class FsmTransitionFailedException extends RuntimeException
         );
 
         // Pass the original exception as both $previous (for chaining) and $originalException (for specific access)
-        return new self($from, $to, $reason, $reason, 0, $exception, $exception);
+        return new self($from, $to, $reason, $reason, -2, $exception, $exception);
     }
 
     public static function forConcurrentModification(

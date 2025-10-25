@@ -124,8 +124,8 @@ class FsmEngineServiceStringifyCallableTest extends TestCase
                 }, 'method'],
             ],
             'mixed array with object' => [
-                               [new \DateTime, 'format'],
-                           ],
+                [new \DateTime, 'format'],
+            ],
         ];
     }
 

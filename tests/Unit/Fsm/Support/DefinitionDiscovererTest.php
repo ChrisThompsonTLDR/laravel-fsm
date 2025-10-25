@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Fsm\Contracts\FsmDefinition;
 use Fsm\Support\DefinitionDiscoverer;
 use Tests\TestCase;
 
@@ -13,7 +12,7 @@ class DefinitionDiscovererTest extends TestCase
         parent::setUp();
 
         // Create temporary directory for testing
-        $this->tempDir = sys_get_temp_dir() . '/fsm_definition_discoverer_test_' . uniqid();
+        $this->tempDir = sys_get_temp_dir().'/fsm_definition_discoverer_test_'.uniqid();
         mkdir($this->tempDir, 0755, true);
     }
 
@@ -29,7 +28,7 @@ class DefinitionDiscovererTest extends TestCase
 
     private function removeDirectory(string $dir): void
     {
-        if (!is_dir($dir)) {
+        if (! is_dir($dir)) {
             return;
         }
 
@@ -40,7 +39,7 @@ class DefinitionDiscovererTest extends TestCase
 
         foreach ($files as $file) {
             if ($file !== '.' && $file !== '..') {
-                $path = $dir . '/' . $file;
+                $path = $dir.'/'.$file;
                 if (is_dir($path)) {
                     $this->removeDirectory($path);
                 } else {
@@ -55,11 +54,11 @@ class DefinitionDiscovererTest extends TestCase
     private function createTestClassFile(string $filename, string $classContent, ?string $directory = null): string
     {
         $targetDir = $directory ?? $this->tempDir;
-        $filepath = $targetDir . '/' . $filename;
+        $filepath = $targetDir.'/'.$filename;
         file_put_contents($filepath, $classContent);
+
         return $filepath;
     }
-
 
     public function test_discovers_fsm_definitions_in_valid_paths(): void
     {
@@ -133,7 +132,7 @@ PHP
 
     public function test_skips_non_directory_paths(): void
     {
-        $filePath = $this->tempDir . '/test_file.php';
+        $filePath = $this->tempDir.'/test_file.php';
         file_put_contents($filePath, '<?php // test file');
 
         $definitions = DefinitionDiscoverer::discover([$filePath]);
@@ -233,7 +232,7 @@ PHP
         );
 
         // Create another file with the same class name (in a subdirectory)
-        $subDir = $this->tempDir . '/subdir';
+        $subDir = $this->tempDir.'/subdir';
         mkdir($subDir, 0755, true);
         $this->createTestClassFile('subdir/DuplicateFsmDefinition.php', <<<'PHP'
 <?php
@@ -259,8 +258,8 @@ PHP
 
     public function test_handles_multiple_paths(): void
     {
-        $tempDir1 = $this->tempDir . '_1';
-        $tempDir2 = $this->tempDir . '_2';
+        $tempDir1 = $this->tempDir.'_1';
+        $tempDir2 = $this->tempDir.'_2';
         mkdir($tempDir1, 0755, true);
         mkdir($tempDir2, 0755, true);
 
@@ -277,7 +276,7 @@ class FsmDefinitionFromDir1 implements FsmDefinition
     }
 }
 PHP
-        , $tempDir1);
+            , $tempDir1);
 
         $this->createTestClassFile('relative_to_temp2.php', <<<'PHP'
 <?php
@@ -292,7 +291,7 @@ class FsmDefinitionFromDir2 implements FsmDefinition
     }
 }
 PHP
-        , $tempDir2);
+            , $tempDir2);
 
         $definitions = DefinitionDiscoverer::discover([$tempDir1, $tempDir2]);
 
@@ -400,7 +399,7 @@ PHP
 
     public function test_works_with_namespaced_classes(): void
     {
-        $namespaceDir = $this->tempDir . '/TestNamespace';
+        $namespaceDir = $this->tempDir.'/TestNamespace';
         mkdir($namespaceDir, 0755, true);
 
         $this->createTestClassFile('TestNamespace/NamespacedFsmDefinition.php', <<<'PHP'

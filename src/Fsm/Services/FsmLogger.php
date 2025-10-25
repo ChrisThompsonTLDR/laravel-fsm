@@ -44,14 +44,17 @@ class FsmLogger
             $ref = new \ReflectionObject($state);
             if ($ref->hasProperty('user_id')) {
                 $prop = $ref->getProperty('user_id');
-                $prop->setAccessible(true);
+                // Ensure property is accessible for reading
+                if (! $prop->isPublic()) {
+                    $prop->setAccessible(true);
+                }
                 $id = $prop->getValue($state);
                 if ($id !== null) {
                     return (string) $id;
                 }
             }
         } catch (\Throwable $e) {
-            // ignore
+            // ignore reflection errors
         }
 
         return null;
@@ -68,6 +71,10 @@ class FsmLogger
      */
     protected function logToChannel(array $data, bool $isFailure = false): void
     {
+        if (! $this->config->get('fsm.logging.enabled', true)) {
+            return;
+        }
+
         $channel = $this->config->get('fsm.logging.channel');
         if (! $channel) {
             return;
@@ -92,7 +99,7 @@ class FsmLogger
             if (isset($data['context_snapshot'])) {
                 $parts[] = 'context_snapshot='.json_encode($data['context_snapshot']);
             }
-            $flatMessage = $message.': '.implode(' | ', $parts);
+            $flatMessage = $message.': '.(empty($parts) ? '' : implode(' | ', $parts));
             $logger->{$isFailure ? 'error' : 'info'}($flatMessage);
         }
     }
@@ -124,6 +131,11 @@ class FsmLogger
             return $contextArray;
         }
 
+        // Ensure we have an array to work with - defensive check
+        if (! is_array($contextArray)) {
+            return $contextArray;
+        }
+
         return $this->recursivelyRemoveSensitiveKeys($contextArray, $sensitiveKeys);
     }
 
@@ -141,6 +153,7 @@ class FsmLogger
         foreach ($data as $key => $value) {
             $currentKey = $prefix ? "{$prefix}.{$key}" : $key;
 
+            // Check if this key should be filtered out
             if (in_array($currentKey, $sensitiveKeys, true)) {
                 continue;
             }
@@ -151,7 +164,8 @@ class FsmLogger
                 continue;
             }
 
-            if ($value instanceof ArgonautDTOContract) {
+            // Convert DTO objects to arrays if needed
+            if (is_object($value) && method_exists($value, 'toArray')) {
                 $value = $value->toArray();
             }
 
@@ -172,7 +186,7 @@ class FsmLogger
      */
     protected function subjectFromVerbs(): ?array
     {
-        if (! $this->config->get('fsm.verbs.log_user_subject', true)) {
+        if (! $this->config->get('fsm.verbs.log_user_subject', false)) {
             return null;
         }
 
@@ -219,17 +233,7 @@ class FsmLogger
         $contextData = $this->filterContextForLogging($context);
         $fromStateValue = $fromState === null ? null : $this->normalizeState($fromState);
 
-        $logData = [
-            'model_id' => $model->getKey(),
-            'model_type' => $model->getMorphClass(),
-            'fsm_column' => $columnName,
-            'from_state' => $fromStateValue,
-            'to_state' => $this->normalizeState($toState),
-            'transition_event' => $transitionEvent,
-            'context_snapshot' => $contextData,
-            'duration_ms' => $durationMs,
-            'happened_at' => Date::now(),
-        ];
+        $logData = ['model_id' => $model->getKey(), 'model_type' => $model->getMorphClass(), 'fsm_column' => $columnName, 'from_state' => $fromStateValue, 'to_state' => $this->normalizeState($toState), 'transition_event' => $transitionEvent, 'context_snapshot' => $contextData, 'duration_ms' => $durationMs];
 
         if ($subject = $this->subjectFromVerbs()) {
             $logData = array_merge($logData, $subject);
@@ -259,6 +263,8 @@ class FsmLogger
         $contextData = $this->filterContextForLogging($context);
         $fromStateValue = $fromState === null ? null : $this->normalizeState($fromState);
 
+        $exceptionDetails = Str::limit((string) $exception, $this->config->get('fsm.logging.exception_character_limit', 65535));
+
         $logData = [
             'model_id' => $model->getKey(),
             'model_type' => $model->getMorphClass(),
@@ -267,9 +273,8 @@ class FsmLogger
             'to_state' => $this->normalizeState($toState),
             'transition_event' => $transitionEvent, // Event name that was attempted
             'context_snapshot' => $contextData,
-            'exception_details' => Str::limit((string) $exception, $this->config->get('fsm.logging.exception_character_limit', 65535)),
+            'exception_details' => $exceptionDetails,
             'duration_ms' => $durationMs,
-            'happened_at' => Date::now(),
         ];
 
         if ($subject = $this->subjectFromVerbs()) {
@@ -298,7 +303,7 @@ class FsmLogger
         $subjectId = $verbEventId;
         $subjectType = null;
 
-        if (! $verbEventId) {
+        if ($verbEventId) {
             $subject = $this->subjectFromVerbs();
             if ($subject) {
                 $subjectId = $subject['subject_id'];
@@ -307,7 +312,7 @@ class FsmLogger
         }
 
         $logData = [
-            'id' => Str::uuid(), // Generate UUID for the log entry itself
+            'id' => Str::uuid(),
             'subject_id' => $subjectId,
             'subject_type' => $subjectType,
             'model_id' => $model->getKey(),
@@ -322,6 +327,6 @@ class FsmLogger
         ];
 
         FsmLog::create($logData);
-        $this->logToChannel($logData, false);
+        $this->logToChannel($logData, true);
     }
 }

@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 use Fsm\Commands\TestReplayApiCommand;
 use Fsm\Http\Controllers\FsmReplayApiController;
-use Fsm\Models\FsmEventLog;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Application;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Orchestra\Testbench\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -21,7 +18,7 @@ class TestReplayApiCommandTest extends TestCase
 
         // Set up Laravel services for testing
         $this->app->singleton('filesystem', function ($app) {
-            return new \Illuminate\Filesystem\Filesystem();
+            return new \Illuminate\Filesystem\Filesystem;
         });
 
         $this->app->singleton(\Illuminate\Contracts\Console\Kernel::class, function ($app) {
@@ -36,7 +33,7 @@ class TestReplayApiCommandTest extends TestCase
 
     private function getCommandTester(): CommandTester
     {
-        $command = new TestReplayApiCommand();
+        $command = new TestReplayApiCommand;
         $command->setLaravel($this->app);
 
         return new CommandTester($command);
@@ -60,20 +57,20 @@ class {$className} extends Model
 }
 PHP;
 
-        $modelPath = app_path('Models/' . $className . '.php');
+        $modelPath = app_path('Models/'.$className.'.php');
         $modelDir = dirname($modelPath);
-        if (!is_dir($modelDir)) {
+        if (! is_dir($modelDir)) {
             mkdir($modelDir, 0755, true);
         }
         file_put_contents($modelPath, $modelContent);
 
         // Also register the class in the autoloader
-        if (!class_exists('App\Models\\' . $className)) {
+        if (! class_exists('App\Models\\'.$className)) {
             // Create a temporary class definition for testing
             eval("namespace App\Models; class {$className} extends \Illuminate\Database\Eloquent\Model { protected \$fillable = ['name', 'status']; protected \$table = '{$className}'; public \$timestamps = false; }");
         }
 
-        return 'App\Models\\' . $className;
+        return 'App\Models\\'.$className;
     }
 
     private function createMockController(): FsmReplayApiController
@@ -89,12 +86,12 @@ PHP;
                         'from_state' => 'pending',
                         'to_state' => 'processing',
                         'transition_name' => 'process',
-                        'occurred_at' => '2023-01-01 10:00:00'
-                    ]
+                        'occurred_at' => '2023-01-01 10:00:00',
+                    ],
                 ],
                 'count' => 1,
             ],
-            'message' => 'Transition history retrieved successfully'
+            'message' => 'Transition history retrieved successfully',
         ]);
 
         $replayResponse = new JsonResponse([
@@ -102,18 +99,18 @@ PHP;
             'data' => [
                 'transition_count' => 1,
                 'initial_state' => 'pending',
-                'final_state' => 'processing'
+                'final_state' => 'processing',
             ],
-            'message' => 'Transitions replayed successfully'
+            'message' => 'Transitions replayed successfully',
         ]);
 
         $validateResponse = new JsonResponse([
             'success' => true,
             'data' => [
                 'valid' => true,
-                'errors' => []
+                'errors' => [],
             ],
-            'message' => 'Transition history is valid'
+            'message' => 'Transition history is valid',
         ]);
 
         $statisticsResponse = new JsonResponse([
@@ -123,34 +120,34 @@ PHP;
                 'unique_states' => 2,
                 'state_frequency' => [
                     'pending' => 1,
-                    'processing' => 1
-                ]
+                    'processing' => 1,
+                ],
             ],
-            'message' => 'Statistics retrieved successfully'
+            'message' => 'Statistics retrieved successfully',
         ]);
 
         $controller->expects($this->any())
-                   ->method('getHistory')
-                   ->willReturn($historyResponse);
+            ->method('getHistory')
+            ->willReturn($historyResponse);
 
         $controller->expects($this->any())
-                   ->method('replayTransitions')
-                   ->willReturn($replayResponse);
+            ->method('replayTransitions')
+            ->willReturn($replayResponse);
 
         $controller->expects($this->any())
-                   ->method('validateHistory')
-                   ->willReturn($validateResponse);
+            ->method('validateHistory')
+            ->willReturn($validateResponse);
 
         $controller->expects($this->any())
-                   ->method('getStatistics')
-                   ->willReturn($statisticsResponse);
+            ->method('getStatistics')
+            ->willReturn($statisticsResponse);
 
         return $controller;
     }
 
     public function test_command_has_correct_signature_and_description(): void
     {
-        $command = new TestReplayApiCommand();
+        $command = new TestReplayApiCommand;
 
         $this->assertEquals('fsm:test-replay-api', $command->getName());
         $this->assertEquals('Test the FSM Replay API functionality', $command->getDescription());
@@ -194,7 +191,7 @@ PHP;
     public function test_validates_model_class_is_eloquent_model(): void
     {
         // Create a non-Eloquent class first
-        $classContent = <<<PHP
+        $classContent = <<<'PHP'
 <?php
 
 class NotAModel
@@ -205,7 +202,7 @@ PHP;
 
         $classPath = app_path('NotAModel.php');
         $classDir = dirname($classPath);
-        if (!is_dir($classDir)) {
+        if (! is_dir($classDir)) {
             mkdir($classDir, 0755, true);
         }
         file_put_contents($classPath, $classContent);
@@ -297,7 +294,7 @@ PHP;
     public function test_command_preserves_existing_functionality(): void
     {
         // Test that the command doesn't break existing functionality
-        $command = new TestReplayApiCommand();
+        $command = new TestReplayApiCommand;
 
         // Test that the command can be instantiated
         $this->assertInstanceOf(TestReplayApiCommand::class, $command);
