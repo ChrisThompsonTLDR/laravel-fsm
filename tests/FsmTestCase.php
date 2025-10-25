@@ -12,6 +12,7 @@ use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Tests\Feature\Fsm\Definitions\OrderStatusFsm;
 use Tests\Feature\Fsm\Definitions\PaymentStatusFsm;
 use Tests\Feature\Fsm\Definitions\TestFeatureFsmDefinition;

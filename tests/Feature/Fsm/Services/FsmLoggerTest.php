@@ -173,9 +173,15 @@ class FsmLoggerTest extends FsmTestCase
     {
         config(['fsm.logging.enabled' => false]);
 
+        // Override global mock to expect no calls
         Log::shouldReceive('channel')->never();
         Log::shouldReceive('info')->never();
         Log::shouldReceive('error')->never();
+        Log::shouldReceive('warning')->never();
+        Log::shouldReceive('debug')->never();
+        Log::shouldReceive('critical')->never();
+        Log::shouldReceive('alert')->never();
+        Log::shouldReceive('emergency')->never();
 
         $context = new TestContextDto('test context');
         $this->logger->logSuccess(
@@ -273,8 +279,15 @@ class FsmLoggerTest extends FsmTestCase
     {
         config(['fsm.logging.log_failures' => false]);
 
+        // Override global mock to expect no calls
         Log::shouldReceive('channel')->never();
         Log::shouldReceive('error')->never();
+        Log::shouldReceive('info')->never();
+        Log::shouldReceive('warning')->never();
+        Log::shouldReceive('debug')->never();
+        Log::shouldReceive('critical')->never();
+        Log::shouldReceive('alert')->never();
+        Log::shouldReceive('emergency')->never();
 
         $context = new TestContextDto('test context');
         $exception = new \Exception('Test failure');
@@ -427,7 +440,15 @@ class FsmLoggerTest extends FsmTestCase
     {
         config(['fsm.logging.channel' => null]);
 
+        // Override global mock to expect no calls
         Log::shouldReceive('channel')->never();
+        Log::shouldReceive('info')->never();
+        Log::shouldReceive('error')->never();
+        Log::shouldReceive('warning')->never();
+        Log::shouldReceive('debug')->never();
+        Log::shouldReceive('critical')->never();
+        Log::shouldReceive('alert')->never();
+        Log::shouldReceive('emergency')->never();
 
         $this->callPrivateMethod('logToChannel', [
             [
@@ -1021,9 +1042,15 @@ class FsmLoggerTest extends FsmTestCase
         // Test logging.enabled mutation (TrueToFalse)
         config(['fsm.logging.enabled' => false]);
 
+        // Override global mock to expect no calls
         Log::shouldReceive('channel')->never();
         Log::shouldReceive('info')->never();
         Log::shouldReceive('error')->never();
+        Log::shouldReceive('warning')->never();
+        Log::shouldReceive('debug')->never();
+        Log::shouldReceive('critical')->never();
+        Log::shouldReceive('alert')->never();
+        Log::shouldReceive('emergency')->never();
 
         $context = new TestContextDto('test context');
         $this->logger->logSuccess(
@@ -1044,8 +1071,15 @@ class FsmLoggerTest extends FsmTestCase
         config(['fsm.logging.enabled' => true]);
         config(['fsm.logging.log_failures' => false]);
 
+        // Override global mock to expect no calls
         Log::shouldReceive('channel')->never();
         Log::shouldReceive('error')->never();
+        Log::shouldReceive('info')->never();
+        Log::shouldReceive('warning')->never();
+        Log::shouldReceive('debug')->never();
+        Log::shouldReceive('critical')->never();
+        Log::shouldReceive('alert')->never();
+        Log::shouldReceive('emergency')->never();
 
         $context = new TestContextDto('test context');
         $exception = new \Exception('Test failure');
