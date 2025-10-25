@@ -130,4 +130,3 @@ class CallableArrayBugDemonstrationTest extends TestCase
         // These should NOT be misinterpreted as DTO property arrays
     }
 }
-

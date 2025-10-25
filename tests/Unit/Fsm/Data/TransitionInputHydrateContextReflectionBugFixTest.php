@@ -21,12 +21,14 @@ use YorCreative\LaravelArgonautDTO\ArgonautDTOContract;
 class UnionTypeWithArrayContext extends Dto
 {
     public string $message;
+
     public int $count;
 
     public function __construct(string|array $message, int $count = 0)
     {
         if (is_array($message) && func_num_args() === 1 && static::isAssociative($message)) {
             parent::__construct($message);
+
             return;
         }
 
@@ -38,12 +40,14 @@ class UnionTypeWithArrayContext extends Dto
 class MixedTypeContext extends Dto
 {
     public mixed $data;
+
     public string $message;
 
     public function __construct(mixed $data, string $message = 'default')
     {
         if (is_array($data) && func_num_args() === 1 && static::isAssociative($data)) {
             parent::__construct($data);
+
             return;
         }
 
@@ -55,12 +59,14 @@ class MixedTypeContext extends Dto
 class ArrayOnlyContext extends Dto
 {
     public array $data;
+
     public string $message;
 
     public function __construct(array $data, string $message = 'default')
     {
         if (is_array($data) && func_num_args() === 1 && static::isAssociative($data)) {
             parent::__construct($data);
+
             return;
         }
 
@@ -72,12 +78,14 @@ class ArrayOnlyContext extends Dto
 class NoTypeContext extends Dto
 {
     public $data;
+
     public string $message;
 
     public function __construct($data, string $message = 'default')
     {
         if (is_array($data) && func_num_args() === 1 && static::isAssociative($data)) {
             parent::__construct($data);
+
             return;
         }
 
@@ -89,6 +97,7 @@ class NoTypeContext extends Dto
 class ArgonautUnionTypeContext implements ArgonautDTOContract
 {
     public string $message;
+
     public int $count;
 
     public function __construct(string|array $message, int $count = 0)
@@ -125,6 +134,7 @@ class ArgonautUnionTypeContext implements ArgonautDTOContract
 class ArgonautArrayOnlyContext implements ArgonautDTOContract
 {
     public array $data;
+
     public string $message;
 
     public function __construct(array $data, string $message = 'default')

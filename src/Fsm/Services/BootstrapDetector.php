@@ -37,7 +37,11 @@ class BootstrapDetector
 
         // Safely get the current command from command line arguments
         $argv = $_SERVER['argv'] ?? [];
-        $command = $argv[1] ?? '';
+        if (! is_array($argv) || count($argv) < 2) {
+            return false;
+        }
+
+        $command = $argv[1];
 
         // Skip discovery for package discovery and basic bootstrap commands
         // Use exact matching to avoid false positives with custom commands
@@ -63,7 +67,11 @@ class BootstrapDetector
 
             // Try to access the database connection
             $db = $this->app->make('db');
-            $db->connection()->getPdo(); // Attempt to get the PDO instance
+
+            // Check if database connection is available
+            if (method_exists($db, 'connection')) {
+                $db->connection()->getPdo(); // Attempt to get the PDO instance
+            }
 
             return false;
         } catch (\Throwable $e) {
@@ -78,11 +86,6 @@ class BootstrapDetector
     private function areEssentialServicesUnavailable(): bool
     {
         try {
-            // Check if essential functions exist
-            if (! function_exists('app') || ! function_exists('config')) {
-                return true;
-            }
-
             // Check if config service is bound
             if (! $this->app->bound('config')) {
                 return true;

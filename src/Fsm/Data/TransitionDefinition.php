@@ -147,18 +147,18 @@ class TransitionDefinition extends Dto
         if (is_array($fromState) && func_num_args() === 1) {
             // Array-based construction: new TransitionDefinition(['fromState' => ..., 'toState' => ...])
             // Validate that it's an associative array
-            if (!static::isAssociative($fromState)) {
+            if (! static::isAssociative($fromState)) {
                 throw new InvalidArgumentException('Array-based initialization requires an associative array with a "toState" or "to_state" key.');
             }
-            
+
             // Validate that toState is present (can be null for wildcard transitions)
-            if (!array_key_exists('toState', $fromState) && !array_key_exists('to_state', $fromState)) {
+            if (! array_key_exists('toState', $fromState) && ! array_key_exists('to_state', $fromState)) {
                 throw new InvalidArgumentException('Array-based initialization requires an associative array with a "toState" or "to_state" key.');
             }
-            
+
             // Process the array directly to avoid infinite recursion
             $attributes = static::prepareAttributes($fromState);
-            
+
             // Initialize properties with proper type conversion and validation
             $this->fromState = $this->validateAndConvertToState($attributes['fromState'] ?? null, 'fromState');
             $this->toState = $this->validateAndConvertToState($attributes['toState'] ?? null, 'toState');
@@ -458,17 +458,17 @@ class TransitionDefinition extends Dto
         if ($value === null) {
             return null;
         }
-        
+
         if ($value instanceof FsmStateEnum) {
             return $value;
         }
-        
+
         if (is_string($value)) {
             return $value;
         }
-        
+
         // For array-based construction, throw validation error
-        throw new InvalidArgumentException("The \"{$paramName}\" value must be a string, FsmStateEnum, or null, got: " . get_debug_type($value));
+        throw new InvalidArgumentException("The \"{$paramName}\" value must be a string, FsmStateEnum, or null, got: ".get_debug_type($value));
     }
 
     /**
@@ -479,13 +479,13 @@ class TransitionDefinition extends Dto
         if ($value === null) {
             return null;
         }
-        
+
         if (is_string($value)) {
             return $value;
         }
-        
+
         // For array-based construction, throw validation error
-        throw new InvalidArgumentException("The \"{$paramName}\" value must be a string or null, got: " . get_debug_type($value));
+        throw new InvalidArgumentException("The \"{$paramName}\" value must be a string or null, got: ".get_debug_type($value));
     }
 
     /**
@@ -496,9 +496,9 @@ class TransitionDefinition extends Dto
         if (is_string($value)) {
             return $value;
         }
-        
+
         // For array-based construction, throw validation error
-        throw new InvalidArgumentException("The \"{$paramName}\" value must be a string, got: " . get_debug_type($value));
+        throw new InvalidArgumentException("The \"{$paramName}\" value must be a string, got: ".get_debug_type($value));
     }
 
     /**
@@ -509,9 +509,9 @@ class TransitionDefinition extends Dto
         if (is_int($value)) {
             return $value;
         }
-        
+
         // For array-based construction, throw validation error
-        throw new InvalidArgumentException("The \"{$paramName}\" value must be an integer, got: " . get_debug_type($value));
+        throw new InvalidArgumentException("The \"{$paramName}\" value must be an integer, got: ".get_debug_type($value));
     }
 
     /**
@@ -522,39 +522,45 @@ class TransitionDefinition extends Dto
         if (is_bool($value)) {
             return $value;
         }
-        
+
         // For array-based construction, throw validation error
-        throw new InvalidArgumentException("The \"{$paramName}\" value must be a boolean, got: " . get_debug_type($value));
+        throw new InvalidArgumentException("The \"{$paramName}\" value must be a boolean, got: ".get_debug_type($value));
     }
 
     /**
      * Validate that a value is an array.
+     */
+    /**
+     * @return array<string, mixed>
      */
     private function validateArray(mixed $value, string $paramName): array
     {
         if (is_array($value)) {
             return $value;
         }
-        
+
         // For array-based construction, throw validation error
-        throw new InvalidArgumentException("The \"{$paramName}\" value must be an array, got: " . get_debug_type($value));
+        throw new InvalidArgumentException("The \"{$paramName}\" value must be an array, got: ".get_debug_type($value));
     }
 
     /**
      * Validate that a value is a Collection or array.
+     */
+    /**
+     * @return Collection<int, mixed>
      */
     private function validateCollection(mixed $value, string $paramName): Collection
     {
         if ($value instanceof Collection) {
             return $value;
         }
-        
+
         if (is_array($value)) {
             return Collection::make($value);
         }
-        
+
         // For array-based construction, throw validation error
-        throw new InvalidArgumentException("The \"{$paramName}\" value must be an array or Collection, got: " . get_debug_type($value));
+        throw new InvalidArgumentException("The \"{$paramName}\" value must be an array or Collection, got: ".get_debug_type($value));
     }
 
     /**

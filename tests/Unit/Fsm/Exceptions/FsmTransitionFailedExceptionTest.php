@@ -137,4 +137,25 @@ class FsmTransitionFailedExceptionTest extends TestCase
         $this->assertEquals($expectedReason, $exception->getReason());
         $this->assertSame($originalException, $exception->getOriginalException());
     }
+
+    public function test_for_callback_exception_factory_has_correct_error_code(): void
+    {
+        $from = MockStateExceptionTest::From;
+        $to = 'completed';
+        $modelClass = 'App\\Models\\Task';
+        $fsmName = 'task_progress';
+        $originalException = new RuntimeException('Something went wrong in callback');
+
+        $exception = FsmTransitionFailedException::forCallbackException(
+            $from,
+            $to,
+            'callback',
+            $originalException,
+            $modelClass,
+            $fsmName
+        );
+
+        // The error code for callback exceptions should be -2 (distinct from other error types)
+        $this->assertEquals(-2, $exception->getCode());
+    }
 }

@@ -34,10 +34,10 @@ class FluentApiTest extends FsmTestCase
             ->from(TestFeatureState::Pending)->to(TestFeatureState::Cancelled)->event('cancel')
             ->from(TestFeatureState::Processing)->to(TestFeatureState::Failed)->event('fail')
             ->transition()
-                ->from(Constants::STATE_WILDCARD)
-                ->to(TestFeatureState::Failed)
-                ->event('force_fail')
-                ->add()
+            ->from(Constants::STATE_WILDCARD)
+            ->to(TestFeatureState::Failed)
+            ->event('force_fail')
+            ->add()
             ->build();
     }
 

@@ -74,7 +74,7 @@ class ResponseDtoConstructorBugFixTest extends TestCase
     public function test_replay_statistics_response_constructor_with_empty_array_throws_exception(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Array-based construction requires a non-empty array.');
+        $this->expectExceptionMessage('Array-based construction requires at least one expected key: success, data, message, error, details');
 
         new ReplayStatisticsResponse([]);
     }
@@ -184,7 +184,7 @@ class ResponseDtoConstructorBugFixTest extends TestCase
     public function test_replay_history_response_constructor_with_empty_array_throws_exception(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Array-based construction requires a non-empty array.');
+        $this->expectExceptionMessage('Array-based construction requires at least one expected key: success, data, message, error, details');
 
         new ReplayHistoryResponse([]);
     }
@@ -294,7 +294,7 @@ class ResponseDtoConstructorBugFixTest extends TestCase
     public function test_replay_transitions_response_constructor_with_empty_array_throws_exception(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Array-based construction requires a non-empty array.');
+        $this->expectExceptionMessage('Array-based construction requires at least one expected key: success, data, message, error, details');
 
         new ReplayTransitionsResponse([]);
     }

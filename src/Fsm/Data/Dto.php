@@ -145,14 +145,18 @@ abstract class Dto extends ArgonautDTO
      */
     protected static function validateArrayForConstruction(array $value, array $expectedKeys = []): void
     {
-        // Must be non-empty
-        if (empty($value)) {
-            throw new InvalidArgumentException('Array-based construction requires a non-empty array.');
-        }
-
         // Must not be a callable array (check this first)
         if (static::isCallableArray($value)) {
             throw new InvalidArgumentException('Array-based construction cannot use callable arrays.');
+        }
+
+        // If array is empty, allow it only if no expected keys are required
+        if (empty($value)) {
+            if (! empty($expectedKeys)) {
+                throw new InvalidArgumentException('Array-based construction requires at least one expected key: '.implode(', ', $expectedKeys));
+            }
+
+            return; // Empty array is allowed when no specific keys are expected
         }
 
         // Must be associative
@@ -183,6 +187,7 @@ abstract class Dto extends ArgonautDTO
 
     /**
      * @param  array<string|int, mixed>  $attributes
+     * @param  array<string|int, mixed>  $defaults
      * @return array<string|int, mixed>
      */
     protected static function prepareAttributes(array $attributes, array $defaults = []): array
@@ -208,6 +213,7 @@ abstract class Dto extends ArgonautDTO
         foreach ($attributes as $key => $value) {
             if (! is_string($key)) {
                 $result[$key] = $value;
+
                 continue;
             }
 

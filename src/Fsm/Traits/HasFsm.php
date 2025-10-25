@@ -91,9 +91,6 @@ trait HasFsm
                 return $event;
             }
 
-            /**
-             * @param  FsmStateEnum|string|null  $state
-             */
             private function normalizeStateValue(FsmStateEnum|string|null $state): string
             {
                 if ($state instanceof FsmStateEnum) {

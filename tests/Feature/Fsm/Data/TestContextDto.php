@@ -23,4 +23,16 @@ class TestContextDto extends Dto
 
         parent::__construct(['info' => $info]);
     }
+
+    /**
+     * Create a new instance from an array.
+     */
+    public static function from(mixed $payload): static
+    {
+        if (is_array($payload) && static::isAssociative($payload)) {
+            return new static($payload);
+        }
+
+        return new static($payload);
+    }
 }

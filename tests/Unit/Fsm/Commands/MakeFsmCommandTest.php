@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 use Fsm\Commands\MakeFsmCommand;
 use Illuminate\Console\Command;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\File;
 use Orchestra\Testbench\TestCase;
-use Symfony\Component\Console\Tester\CommandTester;
 
 class MakeFsmCommandTest extends TestCase
 {
@@ -15,14 +12,13 @@ class MakeFsmCommandTest extends TestCase
     {
         parent::setUp();
 
-
         // Set up Laravel paths for testing
         $this->app->setBasePath(sys_get_temp_dir());
         config(['app.namespace' => 'App']);
 
         // Set up filesystem configuration for testing
         $this->app->singleton('filesystem', function ($app) {
-            return new \Illuminate\Filesystem\Filesystem();
+            return new \Illuminate\Filesystem\Filesystem;
         });
 
         // Set up required Laravel services

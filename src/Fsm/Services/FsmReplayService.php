@@ -36,7 +36,7 @@ class FsmReplayService
             throw new \InvalidArgumentException('The modelId cannot be an empty string.');
         }
 
-        if (trim($columnName) === '') {
+        if ($columnName === '') {
             throw new \InvalidArgumentException('The columnName cannot be an empty string.');
         }
 
@@ -53,6 +53,7 @@ class FsmReplayService
      */
     public function replayTransitions(string $modelClass, string $modelId, string $columnName): array
     {
+        // Validate input parameters to prevent empty strings
         if (trim($modelId) === '') {
             throw new \InvalidArgumentException('The modelId cannot be an empty string.');
         }
@@ -95,6 +96,7 @@ class FsmReplayService
      */
     public function validateTransitionHistory(string $modelClass, string $modelId, string $columnName): array
     {
+        // Validate input parameters to prevent empty strings
         if (trim($modelId) === '') {
             throw new \InvalidArgumentException('The modelId cannot be an empty string.');
         }
@@ -106,14 +108,11 @@ class FsmReplayService
         $transitions = $this->getTransitionHistory($modelClass, $modelId, $columnName);
         $errors = [];
 
-        if ($transitions->isEmpty()) {
-            return ['valid' => true, 'errors' => []];
-        }
-
         $previousToState = null;
 
         foreach ($transitions as $index => $transition) {
             // Check for consistency between transitions
+            // Only check consistency for transitions after the first one
             if ($index > 0 && $previousToState !== $transition->from_state) {
                 $errors[] = "Transition {$index}: from_state '{$transition->from_state}' doesn't match previous to_state '{$previousToState}'";
             }
@@ -144,6 +143,7 @@ class FsmReplayService
      */
     public function getTransitionStatistics(string $modelClass, string $modelId, string $columnName): array
     {
+        // Validate input parameters to prevent empty strings
         if (trim($modelId) === '') {
             throw new \InvalidArgumentException('The modelId cannot be an empty string.');
         }
@@ -163,7 +163,7 @@ class FsmReplayService
                 $stateFrequency[$transition->from_state] = ($stateFrequency[$transition->from_state] ?? 0) + 1;
             }
 
-            // Count to_state frequency
+            // Count to_state frequency (always count, even for initial null state)
             $stateFrequency[$transition->to_state] = ($stateFrequency[$transition->to_state] ?? 0) + 1;
 
             // Count transition frequency
@@ -173,7 +173,7 @@ class FsmReplayService
 
         return [
             'total_transitions' => $transitions->count(),
-            'unique_states' => count(array_unique(array_keys($stateFrequency))),
+            'unique_states' => count($stateFrequency),
             'state_frequency' => $stateFrequency,
             'transition_frequency' => $transitionFrequency,
         ];

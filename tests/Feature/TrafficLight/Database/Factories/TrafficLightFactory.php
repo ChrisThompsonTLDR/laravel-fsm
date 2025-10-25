@@ -12,7 +12,7 @@ class TrafficLightFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->streetName() . ' & ' . $this->faker->streetName(),
+            'name' => $this->faker->streetName().' & '.$this->faker->streetName(),
             'state' => 'red',
         ];
     }

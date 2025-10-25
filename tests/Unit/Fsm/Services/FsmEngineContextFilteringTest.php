@@ -19,6 +19,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Mockery;
 use Orchestra\Testbench\TestCase;
+use ReflectionClass;
+use ReflectionMethod;
 use YorCreative\LaravelArgonautDTO\ArgonautDTO;
 use YorCreative\LaravelArgonautDTO\ArgonautDTOContract;
 
@@ -234,6 +236,9 @@ class FilterContextWithPrivateFromMethod implements ArgonautDTOContract
     }
 }
 
+/**
+ * @covers Fsm\Services\FsmEngineService
+ */
 class FsmEngineContextFilteringTest extends TestCase
 {
     protected function tearDown(): void
@@ -427,44 +432,45 @@ class FsmEngineContextFilteringTest extends TestCase
     {
         // Create a DTO class that implements ArgonautDTOContract directly (not extending Dto)
         // and fails when constructed with an array
-        $failingDtoClass = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract {
+        $failingDtoClass = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        {
             public string $message;
-            
+
             public function __construct(string|array $message = 'test')
             {
                 // Always fail when constructed with an array (this happens during filtering recreation)
                 if (is_array($message)) {
                     throw new \RuntimeException('Constructor intentionally fails for testing');
                 }
-                
+
                 $this->message = $message;
             }
-            
+
             public function toArray(int $depth = 3): array
             {
                 return ['message' => $this->message];
             }
-            
+
             public function toJson($options = 0): string
             {
                 return json_encode($this->toArray(), $options);
             }
         };
-        
+
         $service = $this->makeService(['message']);
-        
+
         // Create an instance of the DTO (this should work since we pass a string)
         $failingDto = new $failingDtoClass('test message');
-        
+
         // Mock Log to capture the warning
         Log::spy();
-        
+
         // Call filterContextForLogging - this should catch the exception and log a warning
         $result = $service->filterContextForLogging($failingDto);
-        
+
         // Verify that the original context is returned when instantiation fails
         $this->assertSame($failingDto, $result);
-        
+
         // Verify that a warning was logged
         Log::shouldHaveReceived('warning')
             ->once()
@@ -562,5 +568,73 @@ class FsmEngineContextFilteringTest extends TestCase
             'Sensitive data should have been filtered out'
         );
         $this->assertNotSame('should not be logged', $filtered->sensitiveData);
+    }
+
+    public function test_can_resolve_from_container_with_built_in_types(): void
+    {
+        $service = $this->makeService();
+
+        $reflection = new ReflectionClass($service);
+        $method = $reflection->getMethod('canResolveFromContainer');
+        $method->setAccessible(true);
+
+        // Create a test method with built-in type parameter
+        $testMethod = new ReflectionMethod($this, 'test_method_with_built_in_type');
+        $paramType = $testMethod->getParameters()[0]->getType();
+
+        $result = $method->invoke($service, $paramType);
+        $this->assertFalse($result); // Built-in types should not be resolved
+    }
+
+    public function test_can_resolve_from_container_with_nullable_type(): void
+    {
+        $service = $this->makeService();
+
+        $reflection = new ReflectionClass($service);
+        $method = $reflection->getMethod('canResolveFromContainer');
+        $method->setAccessible(true);
+
+        // Create a test method with nullable type parameter
+        $testMethod = new ReflectionMethod($this, 'test_method_with_nullable_type');
+        $paramType = $testMethod->getParameters()[0]->getType();
+
+        $result = $method->invoke($service, $paramType);
+        $this->assertFalse($result); // Nullable types should not be resolved
+    }
+
+    public function test_resolve_from_container_with_non_named_type_throws(): void
+    {
+        $service = $this->makeService();
+
+        $reflection = new ReflectionClass($service);
+        $method = $reflection->getMethod('resolveFromContainer');
+        $method->setAccessible(true);
+
+        // Create a test method with union type parameter (PHP 8.0+)
+        if (PHP_VERSION_ID >= 80000) {
+            $testMethod = new ReflectionMethod($this, 'test_method_with_union_type');
+            $paramType = $testMethod->getParameters()[0]->getType();
+
+            $this->expectException(\InvalidArgumentException::class);
+            $method->invoke($service, $paramType);
+        } else {
+            $this->markTestSkipped('Union types require PHP 8.0+');
+        }
+    }
+
+    // Helper methods for reflection tests
+    private function test_method_with_built_in_type(string $param): void
+    {
+        // This method is used for reflection testing
+    }
+
+    private function test_method_with_nullable_type(?string $param): void
+    {
+        // This method is used for reflection testing
+    }
+
+    private function test_method_with_union_type(string|int $param): void
+    {
+        // This method is used for reflection testing
     }
 }

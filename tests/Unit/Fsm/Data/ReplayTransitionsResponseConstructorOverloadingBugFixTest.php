@@ -121,7 +121,7 @@ class ReplayTransitionsResponseConstructorOverloadingBugFixTest extends TestCase
     public function test_from_array_throws_exception_for_invalid_data(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Array-based construction requires a non-empty array.');
+        $this->expectExceptionMessage('Array-based construction requires at least one expected key: success, data, message, error, details');
 
         ReplayTransitionsResponse::fromArray([]);
     }

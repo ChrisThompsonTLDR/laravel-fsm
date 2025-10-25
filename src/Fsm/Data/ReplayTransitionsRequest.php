@@ -62,6 +62,7 @@ class ReplayTransitionsRequest extends Dto
             'modelClass' => [
                 'required',
                 'string',
+                'min:1',
                 function ($attribute, $value, $fail) {
                     if (! class_exists($value)) {
                         $fail("The {$attribute} must be a valid class name.");
@@ -74,8 +75,8 @@ class ReplayTransitionsRequest extends Dto
                     }
                 },
             ],
-            'modelId' => ['required', 'string'],
-            'columnName' => ['required', 'string'],
+            'modelId' => ['required', 'string', 'min:1'],
+            'columnName' => ['required', 'string', 'min:1'],
         ];
     }
 }

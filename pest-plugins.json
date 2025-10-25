@@ -1,0 +1,5 @@
+[
+    "Pest\\Mutate\\Plugins\\Mutate",
+    "Pest\\Plugins\\Configuration",
+    "Pest\\Plugins\\Parallel"
+]

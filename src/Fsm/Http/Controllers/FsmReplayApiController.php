@@ -70,6 +70,8 @@ class FsmReplayApiController extends Controller
                     'count' => $history->count(),
                 ],
                 'message' => 'Transition history retrieved successfully',
+                'error' => null,
+                'details' => null,
             ]);
 
             return response()->json($response->toArray());
@@ -84,12 +86,23 @@ class FsmReplayApiController extends Controller
             ]);
 
             return response()->json($response->toArray(), 422);
+        } catch (\InvalidArgumentException $e) {
+            $response = ReplayHistoryResponse::from([
+                'success' => false,
+                'data' => [],
+                'message' => 'Validation failed',
+                'error' => 'Validation failed',
+                'details' => ['general' => [$e->getMessage()]],
+            ]);
+
+            return response()->json($response->toArray(), 422);
         } catch (\Throwable $e) {
             $response = ReplayHistoryResponse::from([
                 'success' => false,
                 'data' => [],
                 'message' => 'Failed to retrieve transition history',
                 'error' => $e->getMessage(),
+                'details' => null,
             ]);
 
             return response()->json($response->toArray(), 500);
@@ -117,6 +130,8 @@ class FsmReplayApiController extends Controller
                 'success' => true,
                 'data' => $replayResult,
                 'message' => 'Transitions replayed successfully',
+                'error' => null,
+                'details' => null,
             ]);
 
             return response()->json($response->toArray());
@@ -131,12 +146,23 @@ class FsmReplayApiController extends Controller
             ]);
 
             return response()->json($response->toArray(), 422);
+        } catch (\InvalidArgumentException $e) {
+            $response = ReplayTransitionsResponse::from([
+                'success' => false,
+                'data' => [],
+                'message' => 'Validation failed',
+                'error' => 'Validation failed',
+                'details' => ['general' => [$e->getMessage()]],
+            ]);
+
+            return response()->json($response->toArray(), 422);
         } catch (\Throwable $e) {
             $response = ReplayTransitionsResponse::from([
                 'success' => false,
                 'data' => [],
                 'message' => 'Failed to replay transitions',
                 'error' => $e->getMessage(),
+                'details' => null,
             ]);
 
             return response()->json($response->toArray(), 500);
@@ -167,6 +193,8 @@ class FsmReplayApiController extends Controller
                 'message' => $validation['valid']
                     ? 'Transition history is valid'
                     : 'Transition history validation failed',
+                'error' => null,
+                'details' => null,
             ]);
 
             return response()->json($response->toArray());
@@ -181,12 +209,23 @@ class FsmReplayApiController extends Controller
             ]);
 
             return response()->json($response->toArray(), 422);
+        } catch (\InvalidArgumentException $e) {
+            $response = ValidateHistoryResponse::from([
+                'success' => false,
+                'data' => [],
+                'message' => 'Validation failed',
+                'error' => 'Validation failed',
+                'details' => ['general' => [$e->getMessage()]],
+            ]);
+
+            return response()->json($response->toArray(), 422);
         } catch (\Throwable $e) {
             $response = ValidateHistoryResponse::from([
                 'success' => false,
                 'data' => [],
                 'message' => 'Failed to validate transition history',
                 'error' => $e->getMessage(),
+                'details' => null,
             ]);
 
             return response()->json($response->toArray(), 500);
@@ -215,6 +254,8 @@ class FsmReplayApiController extends Controller
                 'success' => true,
                 'data' => $statistics,
                 'message' => 'Statistics retrieved successfully',
+                'error' => null,
+                'details' => null,
             ]);
 
             return response()->json($response->toArray());
@@ -229,12 +270,23 @@ class FsmReplayApiController extends Controller
             ]);
 
             return response()->json($response->toArray(), 422);
+        } catch (\InvalidArgumentException $e) {
+            $response = ReplayStatisticsResponse::from([
+                'success' => false,
+                'data' => [],
+                'message' => 'Validation failed',
+                'error' => 'Validation failed',
+                'details' => ['general' => [$e->getMessage()]],
+            ]);
+
+            return response()->json($response->toArray(), 422);
         } catch (\Throwable $e) {
             $response = ReplayStatisticsResponse::from([
                 'success' => false,
                 'data' => [],
                 'message' => 'Failed to retrieve statistics',
                 'error' => $e->getMessage(),
+                'details' => null,
             ]);
 
             return response()->json($response->toArray(), 500);

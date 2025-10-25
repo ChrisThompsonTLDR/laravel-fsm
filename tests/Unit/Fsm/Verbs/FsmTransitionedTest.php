@@ -3,15 +3,15 @@
 declare(strict_types=1);
 
 use Fsm\Constants;
-use Fsm\Contracts\FsmStateEnum;
 use Fsm\Data\TransitionInput;
 use Fsm\Verbs\FsmTransitioned;
 use Illuminate\Database\Eloquent\Model;
-use YorCreative\LaravelArgonautDTO\ArgonautDTOContract;
 
 beforeEach(function () {
-    $this->model = new class extends Model {
+    $this->model = new class extends Model
+    {
         protected $fillable = ['name', 'status'];
+
         public $timestamps = false;
     };
 
@@ -260,7 +260,7 @@ it('generates correct aggregate id', function () {
         toState: $this->toState
     );
 
-    $expectedAggregateId = get_class($this->model) . ':1:' . $this->fsmColumn;
+    $expectedAggregateId = get_class($this->model).':1:'.$this->fsmColumn;
     expect($verb->getAggregateId())->toBe($expectedAggregateId);
 });
 
@@ -315,7 +315,7 @@ it('handles null states correctly', function () {
 
 it('handles enum states correctly', function () {
     // Create proper enum classes for testing
-    if (!enum_exists('TestPendingState')) {
+    if (! enum_exists('TestPendingState')) {
         eval('enum TestPendingState: string implements \Fsm\Contracts\FsmStateEnum {
             case PENDING = "pending";
 
@@ -329,7 +329,7 @@ it('handles enum states correctly', function () {
         }');
     }
 
-    if (!enum_exists('TestProcessingState')) {
+    if (! enum_exists('TestProcessingState')) {
         eval('enum TestProcessingState: string implements \Fsm\Contracts\FsmStateEnum {
             case PROCESSING = "processing";
 

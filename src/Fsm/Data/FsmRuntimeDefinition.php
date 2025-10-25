@@ -87,7 +87,8 @@ class FsmRuntimeDefinition
 
                 $definedTransitionFromStateValueAsString = ($t->fromState === null) ? null : self::getStateValue($t->fromState);
 
-                return $definedTransitionFromStateValueAsString === Constants::STATE_WILDCARD ||
+                return $definedTransitionFromStateValueAsString === null || // wildcard from state
+                    $definedTransitionFromStateValueAsString === Constants::STATE_WILDCARD ||
                     $definedTransitionFromStateValueAsString === $searchFromValueAsString;
             }
         ));

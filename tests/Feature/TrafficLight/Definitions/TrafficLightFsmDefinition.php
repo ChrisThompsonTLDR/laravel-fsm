@@ -16,12 +16,14 @@ class TrafficLightFsmDefinition implements FsmDefinition
             ->state(TrafficLightState::Red)
             ->state(TrafficLightState::Yellow)
             ->state(TrafficLightState::Green)
-            ->from(TrafficLightState::Red)->to(TrafficLightState::Green)
-            ->event('change')
+            ->from(TrafficLightState::Red)->to(TrafficLightState::Yellow)
+            ->event('cycle')
+            ->from(TrafficLightState::Yellow)->to(TrafficLightState::Green)
+            ->event('cycle')
             ->from(TrafficLightState::Green)->to(TrafficLightState::Yellow)
-            ->event('change')
+            ->event('cycle')
             ->from(TrafficLightState::Yellow)->to(TrafficLightState::Red)
-            ->event('change')
+            ->event('cycle')
             ->build();
     }
 }

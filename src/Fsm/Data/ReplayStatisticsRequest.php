@@ -62,6 +62,7 @@ class ReplayStatisticsRequest extends Dto
             'modelClass' => [
                 'required',
                 'string',
+                'min:1',
                 function ($attribute, $value, $fail) {
                     if (! class_exists($value)) {
                         $fail("The {$attribute} must be a valid class name.");

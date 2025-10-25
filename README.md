@@ -1,5 +1,16 @@
 # Laravel FSM
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/christhompsontldr/laravel-fsm.svg?style=flat-square)](https://packagist.org/packages/christhompsontldr/laravel-fsm)
+[![License](https://img.shields.io/packagist/l/christhompsontldr/laravel-fsm.svg?style=flat-square)](https://packagist.org/packages/christhompsontldr/laravel-fsm)
+[![PHP Version](https://img.shields.io/packagist/php-v/christhompsontldr/laravel-fsm.svg?style=flat-square)](https://packagist.org/packages/christhompsontldr/laravel-fsm)
+
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/christhompsontldr/laravel-fsm/ci.yml?branch=main&label=tests)](https://github.com/christhompsontldr/laravel-fsm/actions)
+[![Coverage Status](https://coveralls.io/repos/github/christhompsontldr/laravel-fsm/badge.svg?branch=main)](https://coveralls.io/github/christhompsontldr/laravel-fsm?branch=main)
+
+[![Laravel Version](https://img.shields.io/badge/Laravel-12.x-red.svg?style=flat-square)](https://laravel.com)
+[![PHPStan](https://img.shields.io/badge/PHPStan-Level%20Max-brightgreen.svg?style=flat-square)](https://phpstan.org)
+[![Pint](https://img.shields.io/badge/Code%20Style-Laravel%20Pint-ff69b4.svg?style=flat-square)](https://laravel.com/docs/pint)
+
 A robust, plug-and-play Finite State Machine (FSM) package for Laravel applications with advanced features like guards, actions, callbacks, state machines, and comprehensive logging.
 
 ## Features

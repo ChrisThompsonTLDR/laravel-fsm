@@ -23,9 +23,10 @@ A traffic light is an excellent example of a state machine because:
 
 ### Definitions
 - **TrafficLightFsmDefinition** (`Definitions/TrafficLightFsmDefinition.php`): FSM definition with transitions:
-  - Red → Green (via 'change' event)
-  - Green → Yellow (via 'change' event)
-  - Yellow → Red (via 'change' event)
+  - Red → Yellow (via 'cycle' event)
+  - Yellow → Green (via 'cycle' event)
+  - Green → Yellow (via 'cycle' event)
+  - Yellow → Red (via 'cycle' event)
 
 ### Factories
 - **TrafficLightFactory** (`Database/Factories/TrafficLightFactory.php`): Factory for creating test traffic lights
@@ -42,14 +43,12 @@ use Tests\Feature\TrafficLight\Enums\TrafficLightState;
 // Create a new traffic light starting at Red
 $light = TrafficLight::factory()->create(['state' => TrafficLightState::Red]);
 
-// Transition to Green
-$light->transitionFsm('state', TrafficLightState::Green);
-echo $light->state->displayName(); // "Green"
-echo $light->state->icon();        // "🟢"
+// Transition through the full cycle
+$light->transitionFsm('state', TrafficLightState::Yellow); // Red → Yellow
+$light->transitionFsm('state', TrafficLightState::Green);  // Yellow → Green
+$light->transitionFsm('state', TrafficLightState::Yellow); // Green → Yellow
+$light->transitionFsm('state', TrafficLightState::Red);    // Yellow → Red
 
-// Continue the cycle
-$light->fsm('state')->trigger('change'); // Green → Yellow
-$light->fsm('state')->trigger('change'); // Yellow → Red
 ```
 
 ## Benefits of This Example

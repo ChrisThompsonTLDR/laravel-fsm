@@ -152,4 +152,3 @@ class ReplayTransitionsRequestTest extends TestCase
         $this->assertCount(1, $customValidation);
     }
 }
-
