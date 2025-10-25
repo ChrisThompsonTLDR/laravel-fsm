@@ -4,11 +4,11 @@ on:
     push:
         paths:
             - '**.php'
-            - 'phpstan.neon.dist'
+            - 'phpstan.neon'
     pull_request:
         paths:
             - '**.php'
-            - 'phpstan.neon.dist'
+            - 'phpstan.neon'
 
 jobs:
     phpstan:
@@ -32,5 +32,5 @@ jobs:
                   composer update --prefer-dist --no-interaction
 
             - name: Run PHPStan
-              run: ./vendor/bin/phpstan --error-format=github
+              run: vendor/bin/phpstan --error-format=github
 
