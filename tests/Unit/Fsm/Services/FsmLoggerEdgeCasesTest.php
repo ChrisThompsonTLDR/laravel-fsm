@@ -144,6 +144,9 @@ class FsmLoggerEdgeCasesTest extends TestCase
     public function test_logging_with_structured_logging_enabled(): void
     {
         $this->config->shouldReceive('get')
+            ->with('fsm.logging.enabled', true)
+            ->andReturn(true);
+        $this->config->shouldReceive('get')
             ->with('fsm.logging.channel')
             ->andReturn('test');
         $this->config->shouldReceive('get')
@@ -165,6 +168,9 @@ class FsmLoggerEdgeCasesTest extends TestCase
      */
     public function test_logging_with_structured_logging_disabled(): void
     {
+        $this->config->shouldReceive('get')
+            ->with('fsm.logging.enabled', true)
+            ->andReturn(true);
         $this->config->shouldReceive('get')
             ->with('fsm.logging.channel')
             ->andReturn('test');
@@ -1586,6 +1592,7 @@ class FsmLoggerEdgeCasesTest extends TestCase
     {
         // Test with switched sides in string concatenation by calling logToChannel directly
         // We'll mock the config to return null for the channel to avoid the config dependency
+        $this->config->shouldReceive('get')->with('fsm.logging.enabled', true)->andReturn(true);
         $this->config->shouldReceive('get')->with('fsm.logging.channel')->andReturn(null);
 
         $reflection = new ReflectionMethod($this->logger, 'logToChannel');

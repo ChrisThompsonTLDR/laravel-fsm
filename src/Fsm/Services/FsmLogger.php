@@ -71,6 +71,10 @@ class FsmLogger
      */
     protected function logToChannel(array $data, bool $isFailure = false): void
     {
+        if (! $this->config->get('fsm.logging.enabled', true)) {
+            return;
+        }
+
         $channel = $this->config->get('fsm.logging.channel');
         if (! $channel) {
             return;
