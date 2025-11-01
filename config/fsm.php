@@ -128,23 +128,12 @@ return [
     | the Fsm\Contracts\FsmDefinition interface. This is used to auto-register FSMs.
     | By default, it looks in the app/Fsm directory.
     |
-    | Note: Using a callback here prevents issues during package discovery in CI
-    | environments where the application may not be fully bootstrapped.
+    | Note: This must be a serializable value for Laravel config caching to work.
+    | Set to null to use the default (app/Fsm), or provide an array of absolute paths.
+    | The FsmRegistry will use getDefaultDiscoveryPaths() if this is null.
     |
     */
-    'discovery_paths' => function () {
-        try {
-            // Only resolve app_path if the functions exist and are working
-            if (function_exists('app_path') && function_exists('app')) {
-                return [app_path('Fsm')];
-            }
-        } catch (\Throwable $e) {
-            // If anything fails, we're not in a bootstrapped environment
-        }
-
-        // Fallback for package discovery or when app isn't fully bootstrapped
-        return [];
-    },
+    'discovery_paths' => null,
 
     /*
     |--------------------------------------------------------------------------
