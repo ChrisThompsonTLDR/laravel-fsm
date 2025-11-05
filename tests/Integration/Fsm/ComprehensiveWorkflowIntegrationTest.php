@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Fsm;
 
+use Fsm\Data\TransitionAction;
 use Fsm\Data\TransitionInput;
-use Fsm\TransitionBuilder;
+use Fsm\FsmBuilder;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -30,12 +31,13 @@ class ComprehensiveWorkflowIntegrationTest extends TestCase
     {
         parent::setUp();
         $this->executionLog = [];
+        FsmBuilder::reset();
     }
 
     #[Test]
     public function comprehensive_order_workflow_demonstrates_all_functionality(): void
     {
-        $builder = TransitionBuilder::for('TestOrder', 'status')
+        $builder = FsmBuilder::for(\stdClass::class, 'status')
             ->initialState('pending')
 
             // Define states with comprehensive callbacks
@@ -163,13 +165,12 @@ class ComprehensiveWorkflowIntegrationTest extends TestCase
         $runtimeDefinition = $builder->buildRuntimeDefinition();
 
         // Verify the FSM structure
-        $this->assertNotNull($runtimeDefinition);
         $this->assertEquals('pending', $runtimeDefinition->initialState);
-        $this->assertCount(4, $runtimeDefinition->stateDefinitions);
-        $this->assertCount(3, $runtimeDefinition->transitionDefinitions);
+        $this->assertCount(4, $runtimeDefinition->states);
+        $this->assertCount(3, $runtimeDefinition->transitions);
 
         // Verify first transition has comprehensive actions/callbacks
-        $processingTransition = $runtimeDefinition->transitionDefinitions[0];
+        $processingTransition = $runtimeDefinition->transitions[0];
         $this->assertEquals('Order Processing Workflow', $processingTransition->description);
 
         // Should have all action types: immediate, regular, queued, success, failure, notify, cleanup
@@ -179,51 +180,55 @@ class ComprehensiveWorkflowIntegrationTest extends TestCase
         $this->assertCount(3, $processingTransition->onTransitionCallbacks);
 
         // Verify action types and properties
-        $actions = $processingTransition->actions->toArray();
+        // Note: Use Collection directly, not toArray(), to preserve object properties
+        $actions = $processingTransition->actions;
 
         // Find immediate action
-        $immediateActions = array_filter($actions, fn ($a) => $a->timing === 'before');
+        $immediateActions = $actions->filter(fn ($a) => $a->timing === TransitionAction::TIMING_BEFORE);
         $this->assertCount(1, $immediateActions);
-        $immediateAction = array_values($immediateActions)[0];
+        $immediateAction = $immediateActions->first();
+        $this->assertNotNull($immediateAction);
         $this->assertEquals('Reserve resources immediately', $immediateAction->name);
         $this->assertEquals(75, $immediateAction->priority); // HIGH priority
 
         // Find queued actions
-        $queuedActions = array_filter($actions, fn ($a) => $a->queued === true);
-        $this->assertGreaterThanOrEqual(2, count($queuedActions)); // At least queued action + notify
+        $queuedActions = $actions->filter(fn ($a) => $a->queued === true);
+        $this->assertGreaterThanOrEqual(2, $queuedActions->count()); // At least queued action + notify
 
         // Find cleanup action
-        $cleanupActions = array_filter($actions, fn ($a) => $a->priority === 25); // LOW priority
+        $cleanupActions = $actions->filter(fn ($a) => $a->priority === TransitionAction::PRIORITY_LOW);
         $this->assertCount(1, $cleanupActions);
-        $cleanupAction = array_values($cleanupActions)[0];
+        $cleanupAction = $cleanupActions->first();
+        $this->assertNotNull($cleanupAction);
         $this->assertEquals('Cleanup action', $cleanupAction->name);
 
         // Verify callbacks
-        $callbacks = $processingTransition->onTransitionCallbacks->toArray();
-        $beforeCallbacks = array_filter($callbacks, fn ($c) => ! $c->runAfterTransition);
-        $afterCallbacks = array_filter($callbacks, fn ($c) => $c->runAfterTransition);
+        $callbacks = $processingTransition->onTransitionCallbacks;
+        $beforeCallbacks = $callbacks->filter(fn ($c) => ! $c->runAfterTransition);
+        $afterCallbacks = $callbacks->filter(fn ($c) => $c->runAfterTransition);
 
         $this->assertCount(1, $beforeCallbacks);
         $this->assertCount(2, $afterCallbacks); // after + log
 
         // Verify state definitions have callbacks
-        $pendingState = array_filter($runtimeDefinition->stateDefinitions, fn ($s) => $s->name === 'pending')[0];
+        $pendingState = $runtimeDefinition->states['pending'];
         $this->assertCount(1, $pendingState->onEntryCallbacks);
         $this->assertCount(1, $pendingState->onExitCallbacks);
 
-        $processingState = array_filter($runtimeDefinition->stateDefinitions, fn ($s) => $s->name === 'processing')[0];
+        $processingState = $runtimeDefinition->states['processing'];
         $this->assertCount(1, $processingState->onEntryCallbacks);
         $this->assertCount(1, $processingState->onExitCallbacks);
 
         // Verify queued state callback
-        $processingEntryCallback = $processingState->onEntryCallbacks[0];
+        $processingEntryCallback = $processingState->onEntryCallbacks->first();
+        $this->assertNotNull($processingEntryCallback);
         $this->assertTrue($processingEntryCallback->queued);
     }
 
     #[Test]
     public function action_parameters_are_preserved(): void
     {
-        $builder = TransitionBuilder::for('TestModel', 'status')
+        $builder = FsmBuilder::for(\stdClass::class, 'status')
             ->from('a')
             ->to('b')
             ->action(fn () => 'test', ['param1' => 'value1', 'param2' => 42])
@@ -233,22 +238,25 @@ class ComprehensiveWorkflowIntegrationTest extends TestCase
         $transition = $builder->getTransitionDefinitions()[0];
 
         // Verify action parameters
-        $action = $transition->actions[0];
+        $action = $transition->actions->first();
+        $this->assertNotNull($action);
         $this->assertEquals(['param1' => 'value1', 'param2' => 42], $action->parameters);
 
         // Verify callback parameters
-        $callback = $transition->onTransitionCallbacks[0];
+        $callback = $transition->onTransitionCallbacks->first();
+        $this->assertNotNull($callback);
         $this->assertEquals(['param3' => true], $callback->parameters);
 
         // Verify queued action parameters
-        $queuedAction = array_filter($transition->actions->toArray(), fn ($a) => $a->queued)[0];
+        $queuedAction = $transition->actions->filter(fn ($a) => $a->queued)->first();
+        $this->assertNotNull($queuedAction);
         $this->assertEquals(['param4' => ['nested' => 'value']], $queuedAction->parameters);
     }
 
     #[Test]
     public function multiple_transitions_can_have_different_action_patterns(): void
     {
-        $builder = TransitionBuilder::for('TestModel', 'status')
+        $builder = FsmBuilder::for(\stdClass::class, 'status')
             // Simple transition with basic actions
             ->from('a')->to('b')
             ->action(fn () => 'simple action')
