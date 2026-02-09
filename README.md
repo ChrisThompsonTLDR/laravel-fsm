@@ -297,7 +297,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class FsmLog extends Model
 {
-    use HasUlids; // Change to HasUlids, or remove entirely for auto-increment IDs
+    use HasUlids; // Using HasUlids, or remove entirely for auto-increment IDs
 
     // Copy all properties and methods from Fsm\Models\FsmLog
     // See: https://github.com/ChrisThompsonTLDR/laravel-fsm/blob/main/src/Fsm/Models/FsmLog.php
@@ -328,7 +328,7 @@ use Fsm\Models\FsmLog as BaseFsmLog;
 class FsmLog extends BaseFsmLog
 {
     /**
-     * Indicates if the model uses UUID/ULID keys.
+     * Override to enable auto-incrementing integer keys.
      */
     public function getIncrementing(): bool
     {
