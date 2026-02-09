@@ -322,7 +322,6 @@ class FsmLogger
         }
 
         $logData = [
-            'id' => Str::uuid(),
             'subject_id' => $subjectId,
             'subject_type' => $subjectType,
             'model_id' => $model->getKey(),
