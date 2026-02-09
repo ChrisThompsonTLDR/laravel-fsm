@@ -291,16 +291,16 @@ Since PHP doesn't allow removing parent traits in child classes, and adding a di
 namespace App\Models;
 
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
-use Illuminate\Database\Eloquent\Concerns\HasUlids; // or remove for auto-incrementing IDs
+use Illuminate\Database\Eloquent\Concerns\HasUlids; // or remove for auto-increment IDs
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class FsmLog extends Model
 {
-    use HasUlids; // Change to HasUlids, or remove entirely for auto-incrementing IDs
+    use HasUlids; // Change to HasUlids, or remove entirely for auto-increment IDs
 
     // Copy all properties and methods from Fsm\Models\FsmLog
-    // See: vendor/christhompson/laravel-fsm/src/Fsm/Models/FsmLog.php
+    // See: https://github.com/ChrisThompsonTLDR/laravel-fsm/blob/main/src/Fsm/Models/FsmLog.php
     
     public $timestamps = false;
     protected $table = 'fsm_logs';
@@ -332,15 +332,15 @@ class FsmLog extends BaseFsmLog
      */
     public function getIncrementing(): bool
     {
-        return true; // Set to true for auto-incrementing IDs
+        return true; // Set to true for auto-increment IDs
     }
 
     /**
-     * Get the auto-incrementing key type.
+     * Get the auto-increment key type.
      */
     public function getKeyType(): string
     {
-        return 'int'; // Change to 'int' for auto-incrementing IDs
+        return 'int'; // Change to 'int' for auto-increment IDs
     }
     
     // Add any additional customizations here
