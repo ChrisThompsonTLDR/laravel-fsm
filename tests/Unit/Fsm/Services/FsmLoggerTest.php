@@ -95,6 +95,7 @@ class FsmLoggerTest extends TestCase
         $app['config']->set('fsm.logging.enabled', true);
         $app['config']->set('fsm.logging.log_failures', true);
         $app['config']->set('fsm.logging.exception_character_limit', 1000);
+        $app['config']->set('fsm.models.fsm_log', \Fsm\Models\FsmLog::class);
     }
 
     protected function getPackageProviders($app)
