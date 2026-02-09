@@ -25,6 +25,7 @@
     "yorcreative/laravel-argonaut-dto": "^1.2"
   },
   "require-dev": {
+    "composer/composer": "^2.8",
     "glhd/bits": "^0.6.1",
     "larastan/larastan": "^3.4.2",
     "laravel/framework": "^12.40.0",
