@@ -14,3 +14,6 @@ coverage.xml
 
 # Local development tools
 bin/
+
+# AI coding tool local memory
+.aim/
