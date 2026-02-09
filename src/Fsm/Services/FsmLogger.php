@@ -337,6 +337,6 @@ class FsmLogger
 
         $fsmLogClass = $this->getFsmLogModelClass();
         $fsmLogClass::create($logData);
-        $this->logToChannel($logData, (bool) ($logData['isFailure'] ?? false));
+        $this->logToChannel($logData, false);
     }
 }
