@@ -37,7 +37,7 @@ class FsmHistoryServiceTest extends FsmTestCase
     public function test_it_returns_empty_collection_for_model_with_no_history(): void
     {
         $model = TestModel::factory()->create();
-        $service = new FsmHistoryService;
+        $service = $this->app->make(FsmHistoryService::class);
 
         $timeline = $service->getStateTimeline($model, 'status');
 
@@ -65,7 +65,7 @@ class FsmHistoryServiceTest extends FsmTestCase
             'subject_type' => TestUser::class,
         ]);
 
-        $service = new FsmHistoryService;
+        $service = $this->app->make(FsmHistoryService::class);
         $timeline = $service->getStateTimeline($model, 'status');
 
         $this->assertCount(1, $timeline);
@@ -123,7 +123,7 @@ class FsmHistoryServiceTest extends FsmTestCase
             ],
         ]);
 
-        $analysis = (new FsmHistoryService)->getStateTimeAnalysis($model, 'status');
+        $analysis = $this->app->make(FsmHistoryService::class)->getStateTimeAnalysis($model, 'status');
 
         $this->assertCount(3, $analysis);
 
