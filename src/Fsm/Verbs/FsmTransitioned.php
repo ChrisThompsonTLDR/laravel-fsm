@@ -163,18 +163,14 @@ class FsmTransitioned extends Event implements SerializedByVerbs // Or StatefulE
     /**
      * Record this verb using the Verbs broker.
      *
-     * This provides a stable API rather than relying on the dynamic
-     * {@code commit()} method inherited from {@see Event}.
+     * This provides a stable API using the static fire() method from Verbs.
+     * The event will be committed automatically at the end of the request/command.
      *
      * @param  mixed  ...$args
      */
     public static function record(...$args): self
     {
-        /** @var self $verb */
-        $verb = new self(...$args);
-        $verb->commit();
-
-        return $verb;
+        return static::fire(...$args);
     }
 
     /**

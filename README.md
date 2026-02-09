@@ -277,6 +277,43 @@ Event::listen(StateTransitioned::class, function (StateTransitioned $event) {
 });
 ```
 
+### Customizing the FsmLog Model
+
+By default, the `FsmLog` model uses UUIDs for its primary key via Laravel's `HasUuids` trait. If you need to customize the `FsmLog` model (e.g., to use auto-incrementing integers or ULIDs instead), you can create your own app-level model and configure the package to use it.
+
+First, create your custom model extending the package's `FsmLog`:
+
+```php
+<?php
+
+namespace App\Models;
+
+use Fsm\Models\FsmLog as BaseFsmLog;
+use Illuminate\Database\Eloquent\Concerns\HasUlids; // or remove UUID/ULID traits entirely
+
+class FsmLog extends BaseFsmLog
+{
+    use HasUlids; // Replace HasUuids with HasUlids, or remove for auto-incrementing IDs
+
+    // Add any additional customizations here
+}
+```
+
+Then, configure the package to use your custom model by adding it to your `config/fsm.php`:
+
+```php
+return [
+    // ... other configuration ...
+
+    'models' => [
+        'fsm_log' => \App\Models\FsmLog::class,
+    ],
+];
+```
+
+**Note:** If you change the primary key type, you'll need to create a migration to modify the `fsm_logs` table structure accordingly. The default migration uses `uuid('id')` for the primary key.
+
+
 ## Commands
 
 ### Generate FSM Diagram

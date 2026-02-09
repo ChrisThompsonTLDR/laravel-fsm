@@ -8,7 +8,7 @@ use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Fsm\Data\StateTimeAnalysisData;
 use Fsm\Data\StateTimelineEntryData;
-use Fsm\Models\FsmLog;
+use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
@@ -20,6 +20,20 @@ use Illuminate\Support\Collection;
  */
 class FsmHistoryService
 {
+    public function __construct(
+        private readonly ConfigRepository $config
+    ) {
+    }
+
+    /**
+     * Get the FsmLog model class from configuration.
+     *
+     * @return string
+     */
+    private function getFsmLogModelClass(): string
+    {
+        return $this->config->get('fsm.models.fsm_log', \Fsm\Models\FsmLog::class);
+    }
     /**
      * Get the complete timeline of state transitions for a model.
      *
@@ -35,7 +49,8 @@ class FsmHistoryService
         ?DateTimeInterface $from = null,
         ?DateTimeInterface $to = null
     ): Collection {
-        $query = FsmLog::query()
+        $fsmLogClass = $this->getFsmLogModelClass();
+        $query = $fsmLogClass::query()
             ->select([
                 'id',
                 'model_id',
@@ -64,7 +79,7 @@ class FsmHistoryService
             $query->where('happened_at', '<=', $to);
         }
 
-        return $query->get()->map(function (FsmLog $log) {
+        return $query->get()->map(function ($log) {
             return StateTimelineEntryData::from([
                 'id' => $log->id,
                 'model_id' => $log->model_id,

@@ -6,7 +6,6 @@ namespace Fsm\Services;
 
 use Fsm\Contracts\FsmStateEnum;
 // For context filtering later
-use Fsm\Models\FsmLog;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
@@ -18,6 +17,15 @@ use YorCreative\LaravelArgonautDTO\ArgonautDTOContract;
 
 class FsmLogger
 {
+    /**
+     * Get the FsmLog model class from configuration.
+     *
+     * @return string
+     */
+    private function getFsmLogModelClass(): string
+    {
+        return $this->config->get('fsm.models.fsm_log', \Fsm\Models\FsmLog::class);
+    }
     /**
      * Extracts user_id from a state object, regardless of property visibility.
      *
@@ -239,7 +247,8 @@ class FsmLogger
             $logData = array_merge($logData, $subject);
         }
 
-        FsmLog::create($logData);
+        $fsmLogClass = $this->getFsmLogModelClass();
+        $fsmLogClass::create($logData);
         $this->logToChannel($logData, false);
     }
 
@@ -281,7 +290,8 @@ class FsmLogger
             $logData = array_merge($logData, $subject);
         }
 
-        FsmLog::create($logData);
+        $fsmLogClass = $this->getFsmLogModelClass();
+        $fsmLogClass::create($logData);
         $this->logToChannel($logData, true);
     }
 
@@ -326,7 +336,8 @@ class FsmLogger
             'happened_at' => Date::now(),
         ];
 
-        FsmLog::create($logData);
+        $fsmLogClass = $this->getFsmLogModelClass();
+        $fsmLogClass::create($logData);
         $this->logToChannel($logData, true);
     }
 }
