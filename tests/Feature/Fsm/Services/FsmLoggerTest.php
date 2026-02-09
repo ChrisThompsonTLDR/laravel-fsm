@@ -603,7 +603,7 @@ class FsmLoggerTest extends FsmTestCase
         config(['fsm.logging.channel' => 'stack']);
 
         $mockLogger = Mockery::mock();
-        $mockLogger->shouldReceive('error')->once()->andReturnNull(); // logTransition uses error
+        $mockLogger->shouldReceive('info')->once()->andReturnNull(); // logTransition defaults to non-failure
 
         Log::shouldReceive('channel')
             ->with('stack')
@@ -1130,7 +1130,7 @@ class FsmLoggerTest extends FsmTestCase
         config(['fsm.logging.structured' => false]);
 
         $mockLogger = Mockery::mock();
-        $mockLogger->shouldReceive('error')
+        $mockLogger->shouldReceive('info')
             ->once()
             ->withArgs(function ($message) {
                 return str_contains($message, 'from_state=idle') &&
