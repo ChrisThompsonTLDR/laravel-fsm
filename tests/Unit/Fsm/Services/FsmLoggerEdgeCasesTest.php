@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Fsm\Services;
 
+use Fsm\Models\FsmLog;
 use Fsm\Services\FsmLogger;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Database\Eloquent\Model;
@@ -48,6 +49,10 @@ class FsmLoggerEdgeCasesTest extends TestCase
         parent::setUp();
 
         $this->config = Mockery::mock(ConfigRepository::class);
+        $this->config->shouldReceive('get')
+            ->with('fsm.models.fsm_log', FsmLog::class)
+            ->andReturn(FsmLog::class)
+            ->byDefault();
         $this->logger = new FsmLogger($this->config);
 
         // Run the fsm_logs migrations
@@ -355,6 +360,42 @@ class FsmLoggerEdgeCasesTest extends TestCase
         $this->assertTrue(true);
     }
 
+    public function test_log_success_throws_runtime_exception_when_configured_log_model_class_does_not_exist(): void
+    {
+        $this->config->shouldReceive('get')
+            ->with('fsm.logging.enabled', true)
+            ->andReturn(true);
+        $this->config->shouldReceive('get')
+            ->with('fsm.verbs.log_user_subject', false)
+            ->andReturn(false);
+        $this->config->shouldReceive('get')
+            ->with('fsm.models.fsm_log', FsmLog::class)
+            ->andReturn('Tests\\Support\\MissingFsmLogModel');
+
+        $model = new class extends Model
+        {
+            protected $guarded = [];
+
+            protected $table = 'test_models';
+
+            public function getKey()
+            {
+                return 123;
+            }
+
+            public function getMorphClass()
+            {
+                return 'TestModel';
+            }
+        };
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('fsm.models.fsm_log');
+        $this->expectExceptionMessage('does not exist');
+
+        $this->logger->logSuccess($model, 'status', 'from', 'to', 'event', null);
+    }
+
     /**
      * Test log failure with logging disabled.
      */
@@ -423,6 +464,48 @@ class FsmLoggerEdgeCasesTest extends TestCase
 
         // Should not throw any exceptions
         $this->assertTrue(true);
+    }
+
+    public function test_log_failure_throws_runtime_exception_when_configured_log_model_class_is_not_fsm_log_subclass(): void
+    {
+        $this->config->shouldReceive('get')
+            ->with('fsm.logging.enabled', true)
+            ->andReturn(true);
+        $this->config->shouldReceive('get')
+            ->with('fsm.logging.log_failures', true)
+            ->andReturn(true);
+        $this->config->shouldReceive('get')
+            ->with('fsm.logging.exception_character_limit', 65535)
+            ->andReturn(1000);
+        $this->config->shouldReceive('get')
+            ->with('fsm.verbs.log_user_subject', false)
+            ->andReturn(false);
+        $this->config->shouldReceive('get')
+            ->with('fsm.models.fsm_log', FsmLog::class)
+            ->andReturn(\stdClass::class);
+
+        $model = new class extends Model
+        {
+            protected $guarded = [];
+
+            protected $table = 'test_models';
+
+            public function getKey()
+            {
+                return 123;
+            }
+
+            public function getMorphClass()
+            {
+                return 'TestModel';
+            }
+        };
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('fsm.models.fsm_log');
+        $this->expectExceptionMessage('must extend');
+
+        $this->logger->logFailure($model, 'status', 'from', 'to', 'event', null, new \Exception('test'));
     }
 
     /**

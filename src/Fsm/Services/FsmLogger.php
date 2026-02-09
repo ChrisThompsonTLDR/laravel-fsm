@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Throwable;
 use Thunk\Verbs\Facades\Verbs;
 use YorCreative\LaravelArgonautDTO\ArgonautDTOContract;
@@ -20,11 +21,32 @@ class FsmLogger
     /**
      * Get the FsmLog model class from configuration.
      *
-     * @return string
+     * @return class-string<\Fsm\Models\FsmLog>
      */
     private function getFsmLogModelClass(): string
     {
-        return $this->config->get('fsm.models.fsm_log', \Fsm\Models\FsmLog::class);
+        $fsmLogClass = $this->config->get('fsm.models.fsm_log', \Fsm\Models\FsmLog::class);
+
+        if (! is_string($fsmLogClass) || $fsmLogClass === '') {
+            throw new RuntimeException('Invalid fsm.models.fsm_log configuration: expected a non-empty class-string.');
+        }
+
+        if (! class_exists($fsmLogClass)) {
+            throw new RuntimeException(sprintf(
+                'Invalid fsm.models.fsm_log configuration: class "%s" does not exist.',
+                $fsmLogClass
+            ));
+        }
+
+        if ($fsmLogClass !== \Fsm\Models\FsmLog::class && ! is_subclass_of($fsmLogClass, \Fsm\Models\FsmLog::class)) {
+            throw new RuntimeException(sprintf(
+                'Invalid fsm.models.fsm_log configuration: class "%s" must extend %s.',
+                $fsmLogClass,
+                \Fsm\Models\FsmLog::class
+            ));
+        }
+
+        return $fsmLogClass;
     }
     /**
      * Extracts user_id from a state object, regardless of property visibility.
