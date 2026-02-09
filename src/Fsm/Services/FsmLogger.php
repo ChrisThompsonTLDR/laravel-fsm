@@ -21,7 +21,7 @@ class FsmLogger
     /**
      * Get the FsmLog model class from configuration.
      *
-     * @return class-string<\Fsm\Models\FsmLog>
+     * @return class-string<Model>
      */
     private function getFsmLogModelClass(): string
     {
@@ -38,11 +38,11 @@ class FsmLogger
             ));
         }
 
-        if ($fsmLogClass !== \Fsm\Models\FsmLog::class && ! is_subclass_of($fsmLogClass, \Fsm\Models\FsmLog::class)) {
+        if (! is_subclass_of($fsmLogClass, Model::class)) {
             throw new RuntimeException(sprintf(
                 'Invalid fsm.models.fsm_log configuration: class "%s" must extend %s.',
                 $fsmLogClass,
-                \Fsm\Models\FsmLog::class
+                Model::class
             ));
         }
 

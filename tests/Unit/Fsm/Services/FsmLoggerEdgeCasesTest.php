@@ -466,7 +466,7 @@ class FsmLoggerEdgeCasesTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function test_log_failure_throws_runtime_exception_when_configured_log_model_class_is_not_fsm_log_subclass(): void
+    public function test_log_failure_throws_runtime_exception_when_configured_log_model_class_is_not_eloquent_model_subclass(): void
     {
         $this->config->shouldReceive('get')
             ->with('fsm.logging.enabled', true)
@@ -504,6 +504,7 @@ class FsmLoggerEdgeCasesTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('fsm.models.fsm_log');
         $this->expectExceptionMessage('must extend');
+        $this->expectExceptionMessage(Model::class);
 
         $this->logger->logFailure($model, 'status', 'from', 'to', 'event', null, new \Exception('test'));
     }

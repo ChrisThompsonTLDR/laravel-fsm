@@ -6,6 +6,8 @@ namespace Tests\Feature\Fsm\Services;
 
 use Fsm\Models\FsmLog;
 use Fsm\Services\FsmLogger;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
 use Mockery;
@@ -13,6 +15,31 @@ use Tests\Feature\Fsm\Data\TestContextDto;
 use Tests\Feature\Fsm\Enums\TestFeatureState;
 use Tests\Feature\Fsm\Models\TestModel;
 use Tests\FsmTestCase;
+
+class CopiedFsmLogModel extends Model
+{
+    use HasUuids;
+
+    public $timestamps = false;
+
+    protected $table = 'fsm_logs';
+
+    protected $fillable = [
+        'id',
+        'subject_id',
+        'subject_type',
+        'model_id',
+        'model_type',
+        'fsm_column',
+        'from_state',
+        'to_state',
+        'transition_event',
+        'context_snapshot',
+        'exception_details',
+        'duration_ms',
+        'happened_at',
+    ];
+}
 
 class FsmLoggerTest extends FsmTestCase
 {
@@ -596,6 +623,31 @@ class FsmLoggerTest extends FsmTestCase
             null,
             150
         );
+    }
+
+    public function test_log_success_accepts_copied_log_model_that_does_not_extend_package_model(): void
+    {
+        config(['fsm.models.fsm_log' => CopiedFsmLogModel::class]);
+
+        $this->logger->logSuccess(
+            $this->model,
+            'status',
+            TestFeatureState::Idle,
+            TestFeatureState::Pending,
+            'copied_model_transition',
+            null,
+            150
+        );
+
+        $this->assertDatabaseHas('fsm_logs', [
+            'model_id' => $this->model->getKey(),
+            'model_type' => $this->model->getMorphClass(),
+            'fsm_column' => 'status',
+            'from_state' => TestFeatureState::Idle->value,
+            'to_state' => TestFeatureState::Pending->value,
+            'transition_event' => 'copied_model_transition',
+            'duration_ms' => 150,
+        ]);
     }
 
     public function test_log_transition_logs_to_channel(): void
