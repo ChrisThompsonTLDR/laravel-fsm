@@ -1844,4 +1844,69 @@ class FsmLoggerTest extends TestCase
         $this->expectExceptionMessage('The columnName cannot be an empty string.');
         $replayService->replayTransitions('TestModel', '123', '   ');
     }
+
+    public function test_custom_fsm_log_model_via_config(): void
+    {
+        // Create a custom FsmLog model class
+        $customLogClass = new class extends \Fsm\Models\FsmLog
+        {
+            protected $table = 'custom_fsm_logs';
+        };
+
+        // Create the custom table
+        $this->app['db']->connection()->getSchemaBuilder()->create('custom_fsm_logs', function ($table) {
+            $table->uuid('id')->primary();
+            $table->string('subject_id')->nullable();
+            $table->string('subject_type')->nullable();
+            $table->string('model_type');
+            $table->string('model_id', 255);
+            $table->string('fsm_column');
+            $table->string('from_state')->nullable();
+            $table->string('to_state');
+            $table->string('transition_event')->nullable();
+            $table->json('context_snapshot')->nullable();
+            $table->text('exception_details')->nullable();
+            $table->integer('duration_ms')->nullable();
+            $table->timestampTz('happened_at')->useCurrent();
+            $table->index(['model_type', 'model_id']);
+        });
+
+        // Set the config to use the custom model
+        Config::set('fsm.models.fsm_log', get_class($customLogClass));
+
+        // Create a new logger instance with the updated config
+        $logger = $this->app->make(FsmLogger::class);
+
+        // Test logSuccess with custom model
+        $model = $this->createTestModel();
+        $context = new TestLogContext('custom model test');
+        $logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'custom_event', $context, 100);
+
+        // Verify the log was created in the custom table
+        $this->assertDatabaseHas('custom_fsm_logs', [
+            'model_id' => $model->id,
+            'model_type' => $model->getMorphClass(),
+            'fsm_column' => 'status',
+            'from_state' => MockStateForLog::LogFrom->value,
+            'to_state' => MockStateForLog::LogTo->value,
+            'transition_event' => 'custom_event',
+            'duration_ms' => 100,
+        ]);
+
+        // Verify nothing was created in the default table
+        $this->assertDatabaseMissing('fsm_logs', [
+            'transition_event' => 'custom_event',
+        ]);
+
+        // Test logFailure with custom model
+        $exception = new \RuntimeException('Test exception');
+        $logger->logFailure($model, 'status', MockStateForLog::LogTo, MockStateForLog::LogFrom, 'custom_failure', $context, $exception, 200);
+
+        // Verify the failure log was created in the custom table
+        $this->assertDatabaseHas('custom_fsm_logs', [
+            'model_id' => $model->id,
+            'transition_event' => 'custom_failure',
+            'duration_ms' => 200,
+        ]);
+    }
 }

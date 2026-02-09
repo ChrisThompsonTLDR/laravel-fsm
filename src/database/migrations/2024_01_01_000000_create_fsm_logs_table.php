@@ -13,9 +13,9 @@ return new class extends Migration
         Schema::create('fsm_logs', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->nullableUuidMorphs('subject'); // Links to verb_events.id if a verb was involved
-            // Use text for model_id to support ULIDs (not just UUIDs)
+            // Use string for model_id with sufficient length to support ULIDs (and UUIDs)
             $table->string('model_type');
-            $table->text('model_id');
+            $table->string('model_id', 255);
             $table->index(['model_type', 'model_id']);
             $table->string('fsm_column');
             $table->string('from_state')->nullable();

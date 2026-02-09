@@ -49,10 +49,13 @@ class FsmLoggerEdgeCasesTest extends TestCase
         parent::setUp();
 
         $this->config = Mockery::mock(ConfigRepository::class);
+        // Add default expectation for fsm.models.fsm_log config
         $this->config->shouldReceive('get')
-            ->with('fsm.models.fsm_log', FsmLog::class)
-            ->andReturn(FsmLog::class)
+            ->with('fsm.models.fsm_log', \Fsm\Models\FsmLog::class)
+            ->andReturn(\Fsm\Models\FsmLog::class)
             ->byDefault();
+        
+
         $this->logger = new FsmLogger($this->config);
 
         // Run the fsm_logs migrations
