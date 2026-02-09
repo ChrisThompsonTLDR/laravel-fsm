@@ -20,9 +20,14 @@ use Illuminate\Support\Collection;
  */
 class FsmHistoryService
 {
-    public function __construct(
-        private readonly ConfigRepository $config
-    ) {
+    /**
+     * Configuration repository instance.
+     */
+    private ConfigRepository $config;
+
+    public function __construct(?ConfigRepository $config = null)
+    {
+        $this->config = $config ?? app(ConfigRepository::class);
     }
 
     /**
@@ -79,7 +84,7 @@ class FsmHistoryService
             $query->where('happened_at', '<=', $to);
         }
 
-        return $query->get()->map(function ($log) {
+        return $query->get()->map(function (Model $log): StateTimelineEntryData {
             return StateTimelineEntryData::from([
                 'id' => $log->id,
                 'model_id' => $log->model_id,
