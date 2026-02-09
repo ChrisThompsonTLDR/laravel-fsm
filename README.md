@@ -332,7 +332,7 @@ class FsmLog extends BaseFsmLog
      */
     public function getIncrementing(): bool
     {
-        return true; // Set to true for auto-increment IDs
+        return true;
     }
 
     /**
@@ -340,7 +340,7 @@ class FsmLog extends BaseFsmLog
      */
     public function getKeyType(): string
     {
-        return 'int'; // Change to 'int' for auto-increment IDs
+        return 'int';
     }
     
     // Add any additional customizations here
