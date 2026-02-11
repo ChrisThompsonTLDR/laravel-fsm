@@ -19,7 +19,7 @@
   ],
   "require": {
     "php": "^8.3|^8.4",
-    "hirethunk/verbs": "^0.7",
+    "hirethunk/verbs": "dev-fix/verb-event-inject-id-before-deserialize as 0.7.2",
     "illuminate/database": "^12.0",
     "illuminate/support": "^12.0",
     "yorcreative/laravel-argonaut-dto": "^1.2"
@@ -46,6 +46,12 @@
       "Tests\\": "tests/"
     }
   },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/ChrisThompsonTLDR/verbs"
+    }
+  ],
   "extra": {
     "laravel": {
       "providers": [
