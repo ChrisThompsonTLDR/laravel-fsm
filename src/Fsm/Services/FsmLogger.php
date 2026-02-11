@@ -48,6 +48,7 @@ class FsmLogger
 
         return $fsmLogClass;
     }
+
     /**
      * Extracts user_id from a state object, regardless of property visibility.
      *

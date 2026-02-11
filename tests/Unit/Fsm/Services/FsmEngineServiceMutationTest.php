@@ -393,6 +393,7 @@ class FsmEngineServiceMutationTest extends TestCase
         $testDto = new class(['sensitive' => 'secret', 'normal' => 'visible']) extends \Fsm\Data\Dto
         {
             public string $sensitive;
+
             public string $normal;
 
             public function __construct(array $data)

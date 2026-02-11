@@ -223,7 +223,7 @@ class FsmHistoryServiceTest extends FsmTestCase
         $analysis = $service->getStateTimeAnalysis($model, 'status');
         // Should have analysis for Pending (time between first and second transition) and Processing (final state)
         $this->assertCount(2, $analysis);
-        
+
         $pendingAnalysis = $analysis->firstWhere('state', TestFeatureState::Pending->value);
         $this->assertNotNull($pendingAnalysis);
         $this->assertSame(TestFeatureState::Pending->value, $pendingAnalysis->state);

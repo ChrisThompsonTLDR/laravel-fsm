@@ -54,7 +54,6 @@ class FsmLoggerEdgeCasesTest extends TestCase
             ->with('fsm.models.fsm_log', \Fsm\Models\FsmLog::class)
             ->andReturn(\Fsm\Models\FsmLog::class)
             ->byDefault();
-        
 
         $this->logger = new FsmLogger($this->config);
 

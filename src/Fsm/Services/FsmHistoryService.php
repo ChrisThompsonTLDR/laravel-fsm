@@ -32,13 +32,12 @@ class FsmHistoryService
 
     /**
      * Get the FsmLog model class from configuration.
-     *
-     * @return string
      */
     private function getFsmLogModelClass(): string
     {
         return $this->config->get('fsm.models.fsm_log', \Fsm\Models\FsmLog::class);
     }
+
     /**
      * Get the complete timeline of state transitions for a model.
      *
@@ -85,6 +84,7 @@ class FsmHistoryService
         }
 
         return $query->get()->map(function (Model $log): StateTimelineEntryData {
+            /** @var \Fsm\Models\FsmLog $log */
             return StateTimelineEntryData::from([
                 'id' => $log->id,
                 'model_id' => $log->model_id,
