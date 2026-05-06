@@ -51,7 +51,7 @@ trait HasFsm
 
             private function mapEvent(FsmEventEnum|string $event): string
             {
-                $event = $event instanceof FsmEventEnum ? $event->value : $event;
+                $event = $event instanceof FsmEventEnum ? (string) $event->value : $event;
 
                 $definition = $this->registry->getDefinition($this->model::class, $this->column);
                 if ($definition) {
