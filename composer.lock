@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dd4723671f8dd98d41cb5bc74eb0f80f",
+    "content-hash": "ca278af6502900434bc4f795042fdf92",
     "packages": [
         {
             "name": "brick/math",
@@ -1112,16 +1112,16 @@
         },
         {
             "name": "hirethunk/verbs",
-            "version": "dev-fix/verb-event-inject-id-before-deserialize",
+            "version": "v0.7.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/ChrisThompsonTLDR/verbs.git",
-                "reference": "18b9ade1182cd6ef9d7f6280151d0bc2ea296780"
+                "url": "https://github.com/hirethunk/verbs.git",
+                "reference": "a0e65facd58caebe69e291c0f8754d3ce74a63db"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ChrisThompsonTLDR/verbs/zipball/18b9ade1182cd6ef9d7f6280151d0bc2ea296780",
-                "reference": "18b9ade1182cd6ef9d7f6280151d0bc2ea296780",
+                "url": "https://api.github.com/repos/hirethunk/verbs/zipball/a0e65facd58caebe69e291c0f8754d3ce74a63db",
+                "reference": "a0e65facd58caebe69e291c0f8754d3ce74a63db",
                 "shasum": ""
             },
             "require": {
@@ -1152,12 +1152,12 @@
             "type": "library",
             "extra": {
                 "laravel": {
-                    "providers": [
-                        "Thunk\\Verbs\\VerbsServiceProvider"
-                    ],
                     "aliases": {
                         "Verbs": "Thunk\\Verbs\\Facades\\Verbs"
-                    }
+                    },
+                    "providers": [
+                        "Thunk\\Verbs\\VerbsServiceProvider"
+                    ]
                 }
             },
             "autoload": {
@@ -1166,63 +1166,7 @@
                     "Thunk\\Verbs\\Database\\Factories\\": "database/factories/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Thunk\\Verbs\\Tests\\": "tests/",
-                    "Thunk\\Verbs\\Examples\\Cart\\": "examples/Cart/src/",
-                    "Thunk\\Verbs\\Examples\\Cart\\Tests\\": "examples/Cart/tests/",
-                    "Thunk\\Verbs\\Examples\\Cart\\Database\\Factories\\": "examples/Cart/database/factories/",
-                    "Thunk\\Verbs\\Examples\\Counter\\": "examples/Counter/src/",
-                    "Thunk\\Verbs\\Examples\\Counter\\Tests\\": "examples/Counter/tests/",
-                    "Thunk\\Verbs\\Examples\\Counter\\Database\\Factories\\": "examples/Counter/database/factories/",
-                    "Thunk\\Verbs\\Examples\\Bank\\": "examples/Bank/src/",
-                    "Thunk\\Verbs\\Examples\\Bank\\Tests\\": "examples/Bank/tests/",
-                    "Thunk\\Verbs\\Examples\\Bank\\Database\\Factories\\": "examples/Bank/database/factories/",
-                    "Thunk\\Verbs\\Examples\\Subscriptions\\": "examples/Subscriptions/src/",
-                    "Thunk\\Verbs\\Examples\\Subscriptions\\Tests\\": "examples/Subscriptions/tests/",
-                    "Thunk\\Verbs\\Examples\\Subscriptions\\Database\\Factories\\": "examples/Subscriptions/database/factories/",
-                    "Thunk\\Verbs\\Examples\\Monopoly\\": "examples/Monopoly/src/",
-                    "Thunk\\Verbs\\Examples\\Monopoly\\Tests\\": "examples/Monopoly/tests/",
-                    "Thunk\\Verbs\\Examples\\Monopoly\\Database\\Factories\\": "examples/Monopoly/database/factories/",
-                    "Workbench\\App\\": "workbench/app/",
-                    "Workbench\\Database\\Factories\\": "workbench/database/factories/",
-                    "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
-                }
-            },
-            "scripts": {
-                "post-autoload-dump": [
-                    "@clear",
-                    "@prepare"
-                ],
-                "post-install-cmd": [
-                    "whisky update"
-                ],
-                "post-update-cmd": [
-                    "whisky update"
-                ],
-                "test": [
-                    "vendor/bin/pest"
-                ],
-                "test-coverage": [
-                    "vendor/bin/pest --coverage"
-                ],
-                "format": [
-                    "vendor/bin/pint"
-                ],
-                "clear": [
-                    "@php vendor/bin/testbench package:purge-skeleton --ansi"
-                ],
-                "prepare": [
-                    "@php vendor/bin/testbench package:discover --ansi"
-                ],
-                "build": [
-                    "@php vendor/bin/testbench workbench:build --ansi"
-                ],
-                "serve": [
-                    "@build",
-                    "@php vendor/bin/testbench serve"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1242,9 +1186,10 @@
                 "verbs"
             ],
             "support": {
-                "source": "https://github.com/ChrisThompsonTLDR/verbs/tree/fix/verb-event-inject-id-before-deserialize"
+                "issues": "https://github.com/hirethunk/verbs/issues",
+                "source": "https://github.com/hirethunk/verbs/tree/v0.7.1"
             },
-            "time": "2026-02-11T16:22:11+00:00"
+            "time": "2026-02-01T01:24:58+00:00"
         },
         {
             "name": "internachi/modularize",
@@ -11786,23 +11731,14 @@
             "time": "2026-01-13T14:02:24+00:00"
         }
     ],
-    "aliases": [
-        {
-            "package": "hirethunk/verbs",
-            "version": "dev-fix/verb-event-inject-id-before-deserialize",
-            "alias": "0.7.2",
-            "alias_normalized": "0.7.2.0"
-        }
-    ],
+    "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "hirethunk/verbs": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.3|^8.4"
     },
-    "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "platform-dev": [],
+    "plugin-api-version": "2.6.0"
 }
