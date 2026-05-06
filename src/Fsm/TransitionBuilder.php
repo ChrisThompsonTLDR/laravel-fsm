@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Fsm;
 
 use Closure;
+use Fsm\Contracts\FsmEventEnum;
 use Fsm\Contracts\FsmStateEnum;
 use Fsm\Data\FsmRuntimeDefinition; // Will be used by FsmRegistry to compile
 use Fsm\Data\HierarchicalStateDefinition;
@@ -538,9 +539,9 @@ class TransitionBuilder
         return $this;
     }
 
-    public function event(string $eventName): self
+    public function event(FsmEventEnum|string $eventName): self
     {
-        $this->fluentEvent = $eventName;
+        $this->fluentEvent = $eventName instanceof FsmEventEnum ? $eventName->value : $eventName;
 
         return $this;
     }
@@ -548,7 +549,7 @@ class TransitionBuilder
     /**
      * Alias for event() method for backward compatibility
      */
-    public function on(string $eventName): self
+    public function on(FsmEventEnum|string $eventName): self
     {
         return $this->event($eventName);
     }
