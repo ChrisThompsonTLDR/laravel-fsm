@@ -541,7 +541,7 @@ class TransitionBuilder
 
     public function event(FsmEventEnum|string $eventName): self
     {
-        $this->fluentEvent = $eventName instanceof FsmEventEnum ? $eventName->value : $eventName;
+        $this->fluentEvent = $eventName instanceof FsmEventEnum ? (string) $eventName->value : $eventName;
 
         return $this;
     }
