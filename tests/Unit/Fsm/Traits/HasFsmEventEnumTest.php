@@ -8,7 +8,6 @@ use Fsm\Contracts\FsmDefinition;
 use Fsm\Contracts\FsmEventEnum;
 use Fsm\Contracts\FsmStateEnum;
 use Fsm\FsmBuilder;
-use Fsm\FsmRegistry;
 use Fsm\Traits\HasFsm;
 use Illuminate\Database\Eloquent\Model;
 use Tests\TestbenchTestCase;
@@ -90,7 +89,7 @@ class HasFsmEventEnumTest extends TestbenchTestCase
         );
 
         FsmBuilder::reset();
-        (new HasFsmEventEnumTestFsm())->define();
+        (new HasFsmEventEnumTestFsm)->define();
     }
 
     protected function tearDown(): void
