@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use Fsm\Data\TransitionGuard;
 use Fsm\Data\TransitionInput;
+use Fsm\Exceptions\FsmTransitionFailedException;
 use Fsm\Guards\CompositeGuard;
+use Illuminate\Database\Eloquent\Model;
 use Tests\TestCase;
 
 /**
@@ -181,7 +183,7 @@ class CompositeGuardIntegrationTest extends TestCase
     {
         // Create a guard with a non-existent method
         $guard = new TransitionGuard(
-            callable: [new \stdClass, 'nonExistentMethod'],
+            callable: [new stdClass, 'nonExistentMethod'],
             parameters: ['param1' => 'hello'],
             priority: 1,
             stopOnFailure: false
@@ -191,7 +193,7 @@ class CompositeGuardIntegrationTest extends TestCase
         $input = $this->createTransitionInput();
 
         // Execute the guard evaluation - should throw FsmTransitionFailedException
-        $this->expectException(\Fsm\Exceptions\FsmTransitionFailedException::class);
+        $this->expectException(FsmTransitionFailedException::class);
 
         $composite->evaluate($input, 'status');
     }
@@ -352,7 +354,7 @@ class CompositeGuardIntegrationTest extends TestCase
                 'param1' => 'hello',
                 'param2' => 42,
                 'param3' => ['nested', 'array'],
-                'param4' => new \stdClass,
+                'param4' => new stdClass,
                 'param5' => 'strlen',
                 // param7 should use default
             ],
@@ -371,7 +373,7 @@ class CompositeGuardIntegrationTest extends TestCase
         $this->assertSame('hello', $guardSpy->receivedParams[0]);
         $this->assertSame(42, $guardSpy->receivedParams[1]);
         $this->assertSame(['nested', 'array'], $guardSpy->receivedParams[2]);
-        $this->assertInstanceOf(\stdClass::class, $guardSpy->receivedParams[3]);
+        $this->assertInstanceOf(stdClass::class, $guardSpy->receivedParams[3]);
         $this->assertSame('strlen', $guardSpy->receivedParams[4]);
         $this->assertInstanceOf(TransitionInput::class, $guardSpy->receivedParams[5]);
         $this->assertTrue($guardSpy->receivedParams[6]);
@@ -380,7 +382,7 @@ class CompositeGuardIntegrationTest extends TestCase
 
     private function createTransitionInput(): TransitionInput
     {
-        $model = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $model = Mockery::mock(Model::class);
         $model->shouldReceive('getForeignKey')->andReturn('test_id');
 
         return new TransitionInput(

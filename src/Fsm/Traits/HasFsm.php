@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Fsm\Traits;
 
 use Fsm\Constants;
+use Fsm\Contracts\FsmEventEnum;
 use Fsm\Contracts\FsmStateEnum;
+use Fsm\Exceptions\FsmTransitionFailedException;
 use Fsm\FsmRegistry;
 use Fsm\Services\FsmEngineService;
 use Illuminate\Database\Eloquent\Model;
@@ -48,8 +50,10 @@ trait HasFsm
                 $this->engine = App::make(FsmEngineService::class);
             }
 
-            private function mapEvent(string $event): string
+            private function mapEvent(FsmEventEnum|string $event): string
             {
+                $event = $event instanceof FsmEventEnum ? (string) $event->value : $event;
+
                 $definition = $this->registry->getDefinition($this->model::class, $this->column);
                 if ($definition) {
                     $currentState = $this->model->getAttribute($this->column);
@@ -104,21 +108,21 @@ trait HasFsm
                 return (string) $state;
             }
 
-            public function trigger(string $event, ?ArgonautDTOContract $ctx = null): Model
+            public function trigger(FsmEventEnum|string $event, ?ArgonautDTOContract $ctx = null): Model
             {
                 $to = $this->mapEvent($event);
 
                 return $this->engine->performTransition($this->model, $this->column, $to, $ctx);
             }
 
-            public function can(string $event, ?ArgonautDTOContract $ctx = null): bool
+            public function can(FsmEventEnum|string $event, ?ArgonautDTOContract $ctx = null): bool
             {
                 $to = $this->mapEvent($event);
 
                 return $this->engine->canTransition($this->model, $this->column, $to, $ctx);
             }
 
-            public function dryRun(string $event, ?ArgonautDTOContract $ctx = null): array
+            public function dryRun(FsmEventEnum|string $event, ?ArgonautDTOContract $ctx = null): array
             {
                 $to = $this->mapEvent($event);
 
@@ -180,7 +184,7 @@ trait HasFsm
      * @param  ArgonautDTOContract|null  $context  Optional context DTO for guards, callbacks, and actions.
      * @return static The model instance.
      *
-     * @throws \Fsm\Exceptions\FsmTransitionFailedException If the transition fails.
+     * @throws FsmTransitionFailedException If the transition fails.
      */
     public function transitionFsm(?string $columnName, FsmStateEnum|string $toState, ?ArgonautDTOContract $context = null): static
     {

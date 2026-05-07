@@ -8,6 +8,7 @@ use Fsm\Data\TransitionInput;
 use Fsm\Exceptions\FsmTransitionFailedException;
 use Fsm\FsmBuilder;
 use Fsm\Models\FsmLog;
+use Fsm\Services\FsmLogger;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -186,7 +187,7 @@ class ConvertedUnitTests extends FsmTestCase
             ->with('stack')
             ->andReturn($channel);
 
-        $logger = $this->app->make(\Fsm\Services\FsmLogger::class);
+        $logger = $this->app->make(FsmLogger::class);
         $subjectInspector = new \ReflectionMethod($logger, 'subjectFromVerbs');
         $subjectInspector->setAccessible(true);
         $this->assertSame(

@@ -6,7 +6,9 @@ use Fsm\Data\TransitionGuard;
 use Fsm\Data\TransitionInput;
 use Fsm\Exceptions\FsmTransitionFailedException;
 use Fsm\Guards\CompositeGuard;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
 use Tests\TestCase;
 
 /**
@@ -218,7 +220,7 @@ class CompositeGuardTest extends TestCase
             new TransitionGuard(
                 callable: function () use (&$executed) {
                     $executed[] = 'High Priority Exception';
-                    throw new \RuntimeException('High priority failed');
+                    throw new RuntimeException('High priority failed');
                 },
                 description: 'High Priority Guard',
                 priority: TransitionGuard::PRIORITY_HIGH
@@ -278,7 +280,7 @@ class CompositeGuardTest extends TestCase
 
         // Act & Assert
         expect(fn () => $composite->evaluate($input, 'status'))
-            ->toThrow(\LogicException::class, 'Unknown guard evaluation strategy: unknown_strategy');
+            ->toThrow(LogicException::class, 'Unknown guard evaluation strategy: unknown_strategy');
     }
 
     public function test_exception_message_contains_correct_column_name(): void
@@ -304,7 +306,7 @@ class CompositeGuardTest extends TestCase
 
     private function createTransitionInput(): TransitionInput
     {
-        $model = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $model = Mockery::mock(Model::class);
         $model->shouldReceive('getForeignKey')->andReturn('test_id');
 
         return new TransitionInput(
@@ -345,7 +347,7 @@ class CompositeGuardTest extends TestCase
         $input = $this->createTransitionInput();
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -368,14 +370,14 @@ class CompositeGuardTest extends TestCase
         $composite = CompositeGuard::create([$guard], CompositeGuard::STRATEGY_ALL_MUST_PASS);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
         $parameters = ['test_param'];
 
         // Mock App::call to verify it's called with the correct string format
-        \Illuminate\Support\Facades\App::shouldReceive('call')
+        App::shouldReceive('call')
             ->once()
             ->with(TestGuardClass::class.'@staticGuard', $parameters)
             ->andReturn(true);
@@ -390,7 +392,7 @@ class CompositeGuardTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -400,7 +402,7 @@ class CompositeGuardTest extends TestCase
         $parameters = ['test'];
 
         // Mock App::call to verify it's called with the closure
-        \Illuminate\Support\Facades\App::shouldReceive('call')
+        App::shouldReceive('call')
             ->once()
             ->with($closure, $parameters)
             ->andReturn(true);
@@ -415,7 +417,7 @@ class CompositeGuardTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -423,7 +425,7 @@ class CompositeGuardTest extends TestCase
         $parameters = ['test_param'];
 
         // Mock App::call to verify it's called with the string callable
-        \Illuminate\Support\Facades\App::shouldReceive('call')
+        App::shouldReceive('call')
             ->once()
             ->with($callable, $parameters)
             ->andReturn(true);
@@ -481,9 +483,9 @@ class CompositeGuardTest extends TestCase
         $input = $this->createTransitionInput();
 
         // Mock App::call to verify it's called with the correct string format
-        \Illuminate\Support\Facades\App::shouldReceive('call')
+        App::shouldReceive('call')
             ->once()
-            ->with(TestGuardClass::class.'@staticGuard', \Mockery::on(function ($args) {
+            ->with(TestGuardClass::class.'@staticGuard', Mockery::on(function ($args) {
                 return isset($args['input']) && $args['input'] instanceof TransitionInput;
             }))
             ->andReturn(true);
@@ -510,9 +512,9 @@ class CompositeGuardTest extends TestCase
         $input = $this->createTransitionInput();
 
         // Mock App::call to verify it's called with the closure
-        \Illuminate\Support\Facades\App::shouldReceive('call')
+        App::shouldReceive('call')
             ->once()
-            ->with($closure, \Mockery::on(function ($args) {
+            ->with($closure, Mockery::on(function ($args) {
                 return isset($args['input']) && $args['input'] instanceof TransitionInput;
             }))
             ->andReturn(true);
@@ -544,7 +546,7 @@ class CompositeGuardTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -586,7 +588,7 @@ class CompositeGuardTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -628,7 +630,7 @@ class CompositeGuardTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -669,7 +671,7 @@ class CompositeGuardTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -680,7 +682,7 @@ class CompositeGuardTest extends TestCase
         ];
 
         // This should throw an ArgumentCountError
-        $this->expectException(\ArgumentCountError::class);
+        $this->expectException(ArgumentCountError::class);
 
         $method->invoke($composite, [$guardSpy, 'guardMethod'], $parameters);
     }
@@ -706,7 +708,7 @@ class CompositeGuardTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -746,7 +748,7 @@ class CompositeGuardTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -754,7 +756,7 @@ class CompositeGuardTest extends TestCase
         $parameters = [
             'param1' => 'hello',
             'param2' => ['nested', 'array'],
-            'param3' => new \stdClass,
+            'param3' => new stdClass,
         ];
 
         $result = $method->invoke($composite, [$guardSpy, 'guardMethod'], $parameters);
@@ -763,7 +765,7 @@ class CompositeGuardTest extends TestCase
         $this->assertTrue($guardSpy->called);
         $this->assertSame('hello', $guardSpy->receivedParams[0]);
         $this->assertSame(['nested', 'array'], $guardSpy->receivedParams[1]);
-        $this->assertInstanceOf(\stdClass::class, $guardSpy->receivedParams[2]);
+        $this->assertInstanceOf(stdClass::class, $guardSpy->receivedParams[2]);
         $this->assertTrue($result);
     }
 }

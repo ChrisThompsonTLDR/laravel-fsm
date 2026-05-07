@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use Fsm\Events\StateTransitioned;
+use Fsm\Events\TransitionSucceeded;
 use Fsm\FsmBuilder;
 use Fsm\FsmRegistry;
 use Fsm\Services\FsmEngineService;
 use Fsm\Services\FsmLogger;
+use Fsm\Services\FsmMetricsService;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,6 +19,7 @@ use Tests\Feature\Fsm\Definitions\OrderStatusFsm;
 use Tests\Feature\Fsm\Definitions\PaymentStatusFsm;
 use Tests\Feature\Fsm\Definitions\TestFeatureFsmDefinition;
 use Tests\Feature\Fsm\Services\TestSpyService;
+use Thunk\Verbs\Facades\Verbs;
 
 abstract class FsmTestCase extends TestbenchTestCase
 {
@@ -56,11 +60,11 @@ abstract class FsmTestCase extends TestbenchTestCase
         // tests that rely on synchronous event handling (e.g. EventCoexistenceTest)
         // still function correctly.
         Event::fakeExcept([
-            \Fsm\Events\TransitionSucceeded::class,
-            \Fsm\Events\StateTransitioned::class,
+            TransitionSucceeded::class,
+            StateTransitioned::class,
         ]);
 
-        \Thunk\Verbs\Facades\Verbs::fake();
+        Verbs::fake();
 
         $this->spyService = $this->app->make(TestSpyService::class);
         $this->spyService->reset();
@@ -80,7 +84,7 @@ abstract class FsmTestCase extends TestbenchTestCase
             return new FsmEngineService(
                 $app->make(FsmRegistry::class),
                 $app->make(FsmLogger::class),
-                $app->make(\Fsm\Services\FsmMetricsService::class),
+                $app->make(FsmMetricsService::class),
                 $app->make(DatabaseManager::class),
                 $app->make(ConfigRepository::class),
             );

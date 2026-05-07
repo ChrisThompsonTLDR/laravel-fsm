@@ -6,6 +6,7 @@ namespace Tests\Feature\Fsm\Behavioral;
 
 use Fsm\FsmBuilder;
 use Fsm\Services\FsmEngineService;
+use Fsm\TransitionBuilder;
 use Illuminate\Support\Facades\Schema;
 use Tests\Feature\Fsm\Data\TestContextData;
 use Tests\Feature\TrafficLight\Enums\TrafficLightState;
@@ -47,7 +48,7 @@ abstract class BehavioralTestCase extends FsmTestCase
     /**
      * Register a traffic light FSM tailored for behavioural testing.
      *
-     * @param  callable(\Fsm\TransitionBuilder): void  $configure
+     * @param  callable(TransitionBuilder): void  $configure
      */
     protected function defineTrafficLightFsm(callable $configure): void
     {

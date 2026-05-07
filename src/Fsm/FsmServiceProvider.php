@@ -7,6 +7,10 @@ namespace Fsm;
 use Fsm\Commands\FsmCacheCommand;
 use Fsm\Commands\FsmDiagramCommand;
 use Fsm\Services\FsmEngineService;
+use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\DatabaseManager;
 use Illuminate\Support\ServiceProvider;
 
 class FsmServiceProvider extends ServiceProvider
@@ -23,7 +27,7 @@ class FsmServiceProvider extends ServiceProvider
         $this->app->singleton(FsmRegistry::class, function ($app) {
             return new FsmRegistry(
                 $app->make(Services\BootstrapDetector::class),
-                $app->make(\Illuminate\Contracts\Config\Repository::class)
+                $app->make(Repository::class)
             );
         });
 
@@ -32,35 +36,35 @@ class FsmServiceProvider extends ServiceProvider
                 $app->make(FsmRegistry::class),
                 $app->make(Services\FsmLogger::class), // Assuming FsmLogger is also registered or auto-resolved
                 $app->make(Services\FsmMetricsService::class),
-                $app->make(\Illuminate\Database\DatabaseManager::class),
-                $app->make(\Illuminate\Contracts\Config\Repository::class)
+                $app->make(DatabaseManager::class),
+                $app->make(Repository::class)
             );
         });
 
         $this->app->singleton(Services\FsmMetricsService::class, function ($app) {
             return new Services\FsmMetricsService(
-                $app->make(\Illuminate\Contracts\Events\Dispatcher::class)
+                $app->make(Dispatcher::class)
             );
         });
 
         // Bind FsmLogger with ConfigRepository dependency
         $this->app->singleton(Services\FsmLogger::class, function ($app) {
             return new Services\FsmLogger(
-                $app->make(\Illuminate\Contracts\Config\Repository::class)
+                $app->make(Repository::class)
             );
         });
 
         // Bind PolicyGuard with Gate dependency
         $this->app->singleton(Guards\PolicyGuard::class, function ($app) {
             return new Guards\PolicyGuard(
-                $app->make(\Illuminate\Contracts\Auth\Access\Gate::class)
+                $app->make(Gate::class)
             );
         });
 
         // Register FSM Extension Registry
         $this->app->singleton(FsmExtensionRegistry::class, function ($app) {
             return new FsmExtensionRegistry(
-                $app->make(\Illuminate\Contracts\Config\Repository::class)
+                $app->make(Repository::class)
             );
         });
 
@@ -119,10 +123,10 @@ class FsmServiceProvider extends ServiceProvider
      */
     protected function registerEventListeners(): void
     {
-        $config = $this->app->make(\Illuminate\Contracts\Config\Repository::class);
+        $config = $this->app->make(Repository::class);
 
         if ($config->get('fsm.event_logging.auto_register_listeners', true)) {
-            $this->app->make(\Illuminate\Contracts\Events\Dispatcher::class)
+            $this->app->make(Dispatcher::class)
                 ->listen(
                     Events\StateTransitioned::class,
                     Listeners\PersistStateTransitionedEvent::class

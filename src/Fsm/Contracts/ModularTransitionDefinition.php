@@ -12,12 +12,12 @@ interface ModularTransitionDefinition
     /**
      * Get the source state for this transition.
      */
-    public function getFromState(): string|\Fsm\Contracts\FsmStateEnum|null;
+    public function getFromState(): string|FsmStateEnum|null;
 
     /**
      * Get the target state for this transition.
      */
-    public function getToState(): string|\Fsm\Contracts\FsmStateEnum;
+    public function getToState(): string|FsmStateEnum;
 
     /**
      * Get the event that triggers this transition.

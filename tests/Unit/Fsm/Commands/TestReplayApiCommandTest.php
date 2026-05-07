@@ -5,7 +5,9 @@ declare(strict_types=1);
 use Fsm\Commands\TestReplayApiCommand;
 use Fsm\Http\Controllers\FsmReplayApiController;
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\JsonResponse;
 use Orchestra\Testbench\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -18,11 +20,11 @@ class TestReplayApiCommandTest extends TestCase
 
         // Set up Laravel services for testing
         $this->app->singleton('filesystem', function ($app) {
-            return new \Illuminate\Filesystem\Filesystem;
+            return new Filesystem;
         });
 
-        $this->app->singleton(\Illuminate\Contracts\Console\Kernel::class, function ($app) {
-            return new \Illuminate\Foundation\Console\Kernel($app);
+        $this->app->singleton(Kernel::class, function ($app) {
+            return new Illuminate\Foundation\Console\Kernel($app);
         });
 
         // Register the controller in the service container for testing
@@ -153,7 +155,7 @@ PHP;
         $this->assertEquals('Test the FSM Replay API functionality', $command->getDescription());
 
         // Check that signature contains expected options using reflection
-        $reflection = new \ReflectionClass($command);
+        $reflection = new ReflectionClass($command);
         $signatureProperty = $reflection->getProperty('signature');
         $signatureProperty->setAccessible(true);
         $signature = $signatureProperty->getValue($command);
@@ -300,7 +302,7 @@ PHP;
         $this->assertInstanceOf(TestReplayApiCommand::class, $command);
 
         // Test that signature is properly formatted using reflection
-        $reflection = new \ReflectionClass($command);
+        $reflection = new ReflectionClass($command);
         $signatureProperty = $reflection->getProperty('signature');
         $signatureProperty->setAccessible(true);
         $signature = $signatureProperty->getValue($command);
