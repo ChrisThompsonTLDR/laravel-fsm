@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Fsm\Data;
 
 use Fsm\Data\TransitionDefinition;
+use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Tests\Feature\Fsm\Enums\TestFeatureState;
@@ -181,9 +182,9 @@ class TransitionDefinitionConstructorOverloadingBugFixTest extends TestCase
             toState: TestFeatureState::Active
         );
 
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->guards);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->actions);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->onTransitionCallbacks);
+        $this->assertInstanceOf(Collection::class, $transition->guards);
+        $this->assertInstanceOf(Collection::class, $transition->actions);
+        $this->assertInstanceOf(Collection::class, $transition->onTransitionCallbacks);
         $this->assertCount(0, $transition->guards);
         $this->assertCount(0, $transition->actions);
         $this->assertCount(0, $transition->onTransitionCallbacks);

@@ -2,10 +2,12 @@
 
 declare(strict_types=1);
 
+use Fsm\Contracts\FsmStateEnum;
 use Fsm\Data\TransitionInput;
 use Fsm\Guards\PolicyGuard;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
@@ -48,7 +50,7 @@ class PolicyGuardTest extends TestCase
     {
         // Arrange
         $user = Mockery::mock(Authenticatable::class);
-        $model = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $model = Mockery::mock(Model::class);
         $input = $this->createTransitionInput($model);
 
         Auth::shouldReceive('user')->andReturn($user);
@@ -69,7 +71,7 @@ class PolicyGuardTest extends TestCase
         // Arrange
         $authUser = Mockery::mock(Authenticatable::class);
         $providedUser = Mockery::mock(Authenticatable::class);
-        $model = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $model = Mockery::mock(Model::class);
         $input = $this->createTransitionInput($model);
 
         Auth::shouldReceive('user')->andReturn($authUser);
@@ -89,7 +91,7 @@ class PolicyGuardTest extends TestCase
     {
         // Arrange
         $user = Mockery::mock(Authenticatable::class);
-        $model = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $model = Mockery::mock(Model::class);
         $input = $this->createTransitionInput($model);
         $additionalParams = ['extra' => 'value'];
 
@@ -110,7 +112,7 @@ class PolicyGuardTest extends TestCase
     {
         // Arrange
         $user = Mockery::mock(Authenticatable::class);
-        $model = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $model = Mockery::mock(Model::class);
         $input = $this->createTransitionInput($model, event: 'confirm');
 
         Auth::shouldReceive('user')->andReturn($user);
@@ -130,7 +132,7 @@ class PolicyGuardTest extends TestCase
     {
         // Arrange
         $user = Mockery::mock(Authenticatable::class);
-        $model = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $model = Mockery::mock(Model::class);
         $input = $this->createTransitionInput($model, event: null);
 
         Auth::shouldReceive('user')->andReturn($user);
@@ -150,8 +152,8 @@ class PolicyGuardTest extends TestCase
     {
         // Arrange
         $user = Mockery::mock(Authenticatable::class);
-        $model = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
-        $fromState = Mockery::mock(\Fsm\Contracts\FsmStateEnum::class);
+        $model = Mockery::mock(Model::class);
+        $fromState = Mockery::mock(FsmStateEnum::class);
         $fromState->value = 'pending';
         $input = $this->createTransitionInput($model, fromState: $fromState);
 
@@ -172,8 +174,8 @@ class PolicyGuardTest extends TestCase
     {
         // Arrange
         $user = Mockery::mock(Authenticatable::class);
-        $model = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
-        $toState = Mockery::mock(\Fsm\Contracts\FsmStateEnum::class);
+        $model = Mockery::mock(Model::class);
+        $toState = Mockery::mock(FsmStateEnum::class);
         $toState->value = 'completed';
         $input = $this->createTransitionInput($model, toState: $toState);
 
@@ -191,13 +193,13 @@ class PolicyGuardTest extends TestCase
     }
 
     private function createTransitionInput(
-        ?\Illuminate\Database\Eloquent\Model $model = null,
+        ?Model $model = null,
         mixed $fromState = null,
         mixed $toState = null,
         ?string $event = null
     ): TransitionInput {
         return new TransitionInput(
-            model: $model ?? Mockery::mock(\Illuminate\Database\Eloquent\Model::class),
+            model: $model ?? Mockery::mock(Model::class),
             fromState: $fromState ?? 'pending',
             toState: $toState ?? 'completed',
             context: null,

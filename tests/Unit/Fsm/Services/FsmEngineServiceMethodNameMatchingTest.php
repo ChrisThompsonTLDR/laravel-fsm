@@ -9,10 +9,14 @@ use Fsm\Data\FsmRuntimeDefinition;
 use Fsm\Data\StateDefinition;
 use Fsm\Data\TransitionDefinition;
 use Fsm\Data\TransitionGuard;
+use Fsm\Data\TransitionInput;
+use Fsm\Exceptions\FsmTransitionFailedException;
 use Fsm\FsmRegistry;
 use Fsm\Services\FsmEngineService;
 use Fsm\Services\FsmLogger;
+use Fsm\Services\FsmMetricsService;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Eloquent\Model;
 use Mockery;
@@ -47,9 +51,9 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
         $config->shouldReceive('get')->with('fsm.logging.excluded_context_properties', [])->andReturn([]);
         $config->shouldReceive('get')->with('fsm.debug', false)->andReturn(false);
 
-        $dispatcher = Mockery::mock(\Illuminate\Contracts\Events\Dispatcher::class);
+        $dispatcher = Mockery::mock(Dispatcher::class);
         $dispatcher->shouldReceive('dispatch')->andReturn(null);
-        $metrics = new \Fsm\Services\FsmMetricsService($dispatcher);
+        $metrics = new FsmMetricsService($dispatcher);
 
         return new FsmEngineService($registry, $logger, $metrics, $db, $config);
     }
@@ -63,9 +67,9 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
         {
             public bool $called = false;
 
-            public ?\Fsm\Data\TransitionInput $input = null;
+            public ?TransitionInput $input = null;
 
-            public function test_method(\Fsm\Data\TransitionInput $input): bool
+            public function test_method(TransitionInput $input): bool
             {
                 $this->called = true;
                 $this->input = $input;
@@ -101,7 +105,7 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
         $result = $service->performTransition($model, 'status', TestState::Processing);
 
         $this->assertTrue($spy->called);
-        $this->assertInstanceOf(\Fsm\Data\TransitionInput::class, $spy->input);
+        $this->assertInstanceOf(TransitionInput::class, $spy->input);
         $this->assertSame(TestState::Processing->value, $result->status);
     }
 
@@ -114,9 +118,9 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
         {
             public bool $called = false;
 
-            public ?\Fsm\Data\TransitionInput $input = null;
+            public ?TransitionInput $input = null;
 
-            public function test_method(\Fsm\Data\TransitionInput $input): bool
+            public function test_method(TransitionInput $input): bool
             {
                 $this->called = true;
                 $this->input = $input;
@@ -152,7 +156,7 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
         $result = $service->performTransition($model, 'status', TestState::Processing);
 
         $this->assertTrue($spy->called);
-        $this->assertInstanceOf(\Fsm\Data\TransitionInput::class, $spy->input);
+        $this->assertInstanceOf(TransitionInput::class, $spy->input);
         $this->assertSame(TestState::Processing->value, $result->status);
     }
 
@@ -233,7 +237,7 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
         $capturedInput = null;
 
         $guard = new TransitionGuard(
-            callable: function (\Fsm\Data\TransitionInput $input) use (&$called, &$capturedInput): bool {
+            callable: function (TransitionInput $input) use (&$called, &$capturedInput): bool {
                 $called = true;
                 $capturedInput = $input;
 
@@ -264,7 +268,7 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
         $result = $service->performTransition($model, 'status', TestState::Processing);
 
         $this->assertTrue($called);
-        $this->assertInstanceOf(\Fsm\Data\TransitionInput::class, $capturedInput);
+        $this->assertInstanceOf(TransitionInput::class, $capturedInput);
         $this->assertSame(TestState::Processing->value, $result->status);
     }
 
@@ -275,7 +279,7 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
     {
         $spy = new class
         {
-            public function existingMethod(\Fsm\Data\TransitionInput $input): bool
+            public function existingMethod(TransitionInput $input): bool
             {
                 return true;
             }
@@ -305,7 +309,7 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
         $service = $this->makeService($definition);
         $model = new TestModel(['status' => TestState::Pending->value]);
 
-        $this->expectException(\Fsm\Exceptions\FsmTransitionFailedException::class);
+        $this->expectException(FsmTransitionFailedException::class);
         $this->expectExceptionMessage('Guard [class@anonymous');
 
         $service->performTransition($model, 'status', TestState::Processing);
@@ -320,11 +324,11 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
         {
             public bool $called = false;
 
-            public ?\Fsm\Data\TransitionInput $input = null;
+            public ?TransitionInput $input = null;
 
             public array $parameters = [];
 
-            public function complexMethod(\Fsm\Data\TransitionInput $input): bool
+            public function complexMethod(TransitionInput $input): bool
             {
                 $this->called = true;
                 $this->input = $input;
@@ -360,7 +364,7 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
         $result = $service->performTransition($model, 'status', TestState::Processing);
 
         $this->assertTrue($spy->called);
-        $this->assertInstanceOf(\Fsm\Data\TransitionInput::class, $spy->input);
+        $this->assertInstanceOf(TransitionInput::class, $spy->input);
         $this->assertSame(TestState::Processing->value, $result->status);
     }
 
@@ -373,11 +377,11 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
         {
             public bool $called = false;
 
-            public ?\Fsm\Data\TransitionInput $input = null;
+            public ?TransitionInput $input = null;
 
             public array $parameters = [];
 
-            public function namedParamMethod(\Fsm\Data\TransitionInput $input): bool
+            public function namedParamMethod(TransitionInput $input): bool
             {
                 $this->called = true;
                 $this->input = $input;
@@ -413,7 +417,7 @@ class FsmEngineServiceMethodNameMatchingTest extends TestCase
         $result = $service->performTransition($model, 'status', TestState::Processing);
 
         $this->assertTrue($spy->called);
-        $this->assertInstanceOf(\Fsm\Data\TransitionInput::class, $spy->input);
+        $this->assertInstanceOf(TransitionInput::class, $spy->input);
         $this->assertSame(TestState::Processing->value, $result->status);
     }
 }
@@ -451,7 +455,7 @@ class TestModel extends Model
 
 class TestCallableClass
 {
-    public static function staticMethod(\Fsm\Data\TransitionInput $input): bool
+    public static function staticMethod(TransitionInput $input): bool
     {
         return true;
     }

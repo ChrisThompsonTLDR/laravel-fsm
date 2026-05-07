@@ -33,7 +33,7 @@ class IntegrationBehavioralTest extends BehavioralTestCase
                 ->event('cycle')
                 ->action(
                     function (TransitionInput $input): void {
-                        /** @var \Tests\Feature\TrafficLight\Models\TrafficLight $model */
+                        /** @var TrafficLight $model */
                         $model = $input->model;
                         $model->update(['name' => $model->name.' (synced)']);
                     },

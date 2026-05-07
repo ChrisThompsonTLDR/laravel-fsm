@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fsm\Guards;
 
+use Fsm\Contracts\FsmStateEnum;
 use Fsm\Data\TransitionGuard;
 use Fsm\Data\TransitionInput;
 use Fsm\Exceptions\FsmTransitionFailedException;
@@ -323,7 +324,7 @@ class CompositeGuard
      */
     private function getStateValue(mixed $state): ?string
     {
-        if ($state instanceof \Fsm\Contracts\FsmStateEnum) {
+        if ($state instanceof FsmStateEnum) {
             return $state->value;
         }
 

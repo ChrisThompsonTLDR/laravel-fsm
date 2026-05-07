@@ -8,6 +8,8 @@ use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
+use Thunk\Verbs\Facades\Verbs;
 
 /**
  * Fsm\Models\FsmLog
@@ -24,7 +26,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property array<string, mixed>|null $context_snapshot
  * @property string|null $exception_details
  * @property int|null $duration_ms
- * @property \Illuminate\Support\Carbon $happened_at
+ * @property Carbon $happened_at
  * @property-read Model|null $subject
  * @property-read Model $model
  */
@@ -101,7 +103,7 @@ class FsmLog extends Model
     /**
      * The subject that triggered this FSM transition (e.g., User).
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo<\Illuminate\Database\Eloquent\Model, $this>
+     * @return MorphTo<Model, $this>
      */
     public function subject(): MorphTo
     {
@@ -109,7 +111,7 @@ class FsmLog extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo<\Illuminate\Database\Eloquent\Model, $this>
+     * @return MorphTo<Model, $this>
      */
     public function model(): MorphTo
     {
@@ -126,12 +128,12 @@ class FsmLog extends Model
             if (
                 empty($log->subject_id)
                 && app(ConfigRepository::class)->get('fsm.verbs.log_user_subject', true)
-                && class_exists(\Thunk\Verbs\Facades\Verbs::class)
+                && class_exists(Verbs::class)
             ) {
                 try {
-                    $verbsInstance = \Thunk\Verbs\Facades\Verbs::getFacadeRoot();
+                    $verbsInstance = Verbs::getFacadeRoot();
                     if (method_exists($verbsInstance, 'state')) {
-                        $state = \Thunk\Verbs\Facades\Verbs::state();
+                        $state = Verbs::state();
                         $userId = self::extractUserId($state);
                         if ($userId) {
                             $log->subject_id = $userId;

@@ -8,6 +8,7 @@ use Fsm\Contracts\ModularTransitionDefinition;
 use Fsm\FsmBuilder;
 use Fsm\FsmExtensionRegistry;
 use Fsm\TransitionBuilder;
+use Illuminate\Config\Repository;
 use Tests\Feature\Fsm\Models\TestModel;
 use Tests\TestCase;
 
@@ -165,7 +166,7 @@ class ModularFsmDefinitionsTest extends TestCase
             ],
         ];
 
-        $configRepo = new \Illuminate\Config\Repository($config);
+        $configRepo = new Repository($config);
         $registry = new FsmExtensionRegistry($configRepo);
 
         $stateDefinitions = $registry->getStateDefinitionsFor(TestModel::class, 'status');
@@ -206,7 +207,7 @@ class ModularFsmDefinitionsTest extends TestCase
             ],
         ];
 
-        $configRepo = new \Illuminate\Config\Repository($config);
+        $configRepo = new Repository($config);
         $registry = new FsmExtensionRegistry($configRepo);
 
         $transitionDefinitions = $registry->getTransitionDefinitionsFor(TestModel::class, 'status');

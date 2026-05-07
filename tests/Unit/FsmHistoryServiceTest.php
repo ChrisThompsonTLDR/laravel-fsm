@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit;
 
 use Carbon\CarbonImmutable;
+use Fsm\Data\StateTimelineEntryData;
 use Fsm\FsmBuilder;
 use Fsm\Models\FsmLog;
 use Fsm\Services\FsmHistoryService;
@@ -70,7 +71,7 @@ class FsmHistoryServiceTest extends FsmTestCase
 
         $this->assertCount(1, $timeline);
 
-        /** @var \Fsm\Data\StateTimelineEntryData $entry */
+        /** @var StateTimelineEntryData $entry */
         $entry = $timeline->first();
 
         $this->assertSame(TestFeatureState::Pending->value, $entry->toState);

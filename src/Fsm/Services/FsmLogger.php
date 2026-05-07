@@ -6,6 +6,7 @@ namespace Fsm\Services;
 
 use Fsm\Contracts\FsmStateEnum;
 // For context filtering later
+use Fsm\Models\FsmLog;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
@@ -21,11 +22,11 @@ class FsmLogger
     /**
      * Get the FsmLog model class from configuration.
      *
-     * @return class-string<\Fsm\Models\FsmLog>
+     * @return class-string<FsmLog>
      */
     private function getFsmLogModelClass(): string
     {
-        $fsmLogClass = $this->config->get('fsm.models.fsm_log', \Fsm\Models\FsmLog::class);
+        $fsmLogClass = $this->config->get('fsm.models.fsm_log', FsmLog::class);
 
         if (! is_string($fsmLogClass) || $fsmLogClass === '') {
             throw new RuntimeException('Invalid fsm.models.fsm_log configuration: expected a non-empty class-string.');
@@ -38,11 +39,11 @@ class FsmLogger
             ));
         }
 
-        if ($fsmLogClass !== \Fsm\Models\FsmLog::class && ! is_subclass_of($fsmLogClass, \Fsm\Models\FsmLog::class)) {
+        if ($fsmLogClass !== FsmLog::class && ! is_subclass_of($fsmLogClass, FsmLog::class)) {
             throw new RuntimeException(sprintf(
                 'Invalid fsm.models.fsm_log configuration: class "%s" must extend %s.',
                 $fsmLogClass,
-                \Fsm\Models\FsmLog::class
+                FsmLog::class
             ));
         }
 
@@ -84,7 +85,7 @@ class FsmLogger
                     return (string) $id;
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // ignore reflection errors
         }
 
@@ -153,7 +154,7 @@ class FsmLogger
 
         try {
             $contextArray = $context->toArray();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $contextArray = get_object_vars($context);
         }
 

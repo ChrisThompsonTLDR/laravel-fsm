@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Fsm\Data;
 
 use Fsm\Data\TransitionDefinition;
+use Illuminate\Support\Collection;
 use PHPUnit\Framework\TestCase;
 use Tests\Feature\Fsm\Enums\TestFeatureState;
 
@@ -176,9 +177,9 @@ class TransitionDefinitionValidationConsistencyTest extends TestCase
         );
 
         // Verify collection properties are properly initialized
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->guards);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->actions);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->onTransitionCallbacks);
+        $this->assertInstanceOf(Collection::class, $transition->guards);
+        $this->assertInstanceOf(Collection::class, $transition->actions);
+        $this->assertInstanceOf(Collection::class, $transition->onTransitionCallbacks);
 
         // Verify they are empty when not provided
         $this->assertCount(0, $transition->guards);
@@ -197,9 +198,9 @@ class TransitionDefinitionValidationConsistencyTest extends TestCase
         ]);
 
         // Verify collection properties are properly initialized
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->guards);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->actions);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->onTransitionCallbacks);
+        $this->assertInstanceOf(Collection::class, $transition->guards);
+        $this->assertInstanceOf(Collection::class, $transition->actions);
+        $this->assertInstanceOf(Collection::class, $transition->onTransitionCallbacks);
 
         // Verify they are empty when not provided
         $this->assertCount(0, $transition->guards);
@@ -212,9 +213,9 @@ class TransitionDefinitionValidationConsistencyTest extends TestCase
      */
     public function test_collection_properties_not_overwritten_with_positional_parameters(): void
     {
-        $guards = new \Illuminate\Support\Collection(['guard1', 'guard2']);
-        $actions = new \Illuminate\Support\Collection(['action1', 'action2']);
-        $callbacks = new \Illuminate\Support\Collection(['callback1', 'callback2']);
+        $guards = new Collection(['guard1', 'guard2']);
+        $actions = new Collection(['action1', 'action2']);
+        $callbacks = new Collection(['callback1', 'callback2']);
 
         $transition = new TransitionDefinition(
             fromState: TestFeatureState::Pending,
@@ -225,9 +226,9 @@ class TransitionDefinitionValidationConsistencyTest extends TestCase
         );
 
         // Verify collection properties are properly set and not overwritten
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->guards);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->actions);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->onTransitionCallbacks);
+        $this->assertInstanceOf(Collection::class, $transition->guards);
+        $this->assertInstanceOf(Collection::class, $transition->actions);
+        $this->assertInstanceOf(Collection::class, $transition->onTransitionCallbacks);
 
         // Verify the collections contain the expected items
         $this->assertCount(2, $transition->guards);
@@ -249,9 +250,9 @@ class TransitionDefinitionValidationConsistencyTest extends TestCase
         ]);
 
         // Verify collection properties are properly set and not overwritten
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->guards);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->actions);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->onTransitionCallbacks);
+        $this->assertInstanceOf(Collection::class, $transition->guards);
+        $this->assertInstanceOf(Collection::class, $transition->actions);
+        $this->assertInstanceOf(Collection::class, $transition->onTransitionCallbacks);
 
         // Verify the collections contain the expected items
         $this->assertCount(2, $transition->guards);
@@ -320,12 +321,12 @@ class TransitionDefinitionValidationConsistencyTest extends TestCase
         $this->assertSame($positionalTransition->timeout, $arrayTransition->timeout);
 
         // Verify collection properties are equivalent
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $positionalTransition->guards);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $arrayTransition->guards);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $positionalTransition->actions);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $arrayTransition->actions);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $positionalTransition->onTransitionCallbacks);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $arrayTransition->onTransitionCallbacks);
+        $this->assertInstanceOf(Collection::class, $positionalTransition->guards);
+        $this->assertInstanceOf(Collection::class, $arrayTransition->guards);
+        $this->assertInstanceOf(Collection::class, $positionalTransition->actions);
+        $this->assertInstanceOf(Collection::class, $arrayTransition->actions);
+        $this->assertInstanceOf(Collection::class, $positionalTransition->onTransitionCallbacks);
+        $this->assertInstanceOf(Collection::class, $arrayTransition->onTransitionCallbacks);
     }
 
     /**

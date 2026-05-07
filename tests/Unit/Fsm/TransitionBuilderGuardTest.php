@@ -131,13 +131,13 @@ class TransitionBuilderGuardTest extends TestCase
     {
         // Act & Assert
         expect(fn () => $this->builder->policy('update'))
-            ->toThrow(\LogicException::class, 'policy() must be called after from() and to() in a transition definition.');
+            ->toThrow(LogicException::class, 'policy() must be called after from() and to() in a transition definition.');
 
         expect(fn () => $this->builder->policyCanTransition())
-            ->toThrow(\LogicException::class, 'policyCanTransition() must be called after from() and to() in a transition definition.');
+            ->toThrow(LogicException::class, 'policyCanTransition() must be called after from() and to() in a transition definition.');
 
         expect(fn () => $this->builder->criticalGuard(fn () => true))
-            ->toThrow(\LogicException::class, 'criticalGuard() must be called after from() and to() in a transition definition.');
+            ->toThrow(LogicException::class, 'criticalGuard() must be called after from() and to() in a transition definition.');
     }
 
     public function test_policy_with_custom_description(): void

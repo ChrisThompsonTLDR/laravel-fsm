@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Fsm;
 
+use Fsm\Contracts\FsmStateEnum;
+use Illuminate\Support\Facades\Log;
+
 /**
  * Collects and builds FSM definitions for various models and their state columns.
  */
@@ -111,7 +114,7 @@ class FsmBuilder
      * @param  class-string  $modelClass
      * @param  array<string, mixed>  $stateConfig
      */
-    public static function overrideState(string $modelClass, string $columnName, string|\Fsm\Contracts\FsmStateEnum $stateName, array $stateConfig): void
+    public static function overrideState(string $modelClass, string $columnName, string|FsmStateEnum $stateName, array $stateConfig): void
     {
         $builder = self::for($modelClass, $columnName);
 
@@ -126,7 +129,7 @@ class FsmBuilder
                 if ($value !== null) {
                     if (! method_exists($builder, $method)) {
                         // Log warning for invalid method and throw exception
-                        \Illuminate\Support\Facades\Log::warning("Invalid state configuration method '{$method}' does not exist on builder object");
+                        Log::warning("Invalid state configuration method '{$method}' does not exist on builder object");
                         throw new \InvalidArgumentException("Invalid state configuration method: {$method}");
                     }
 
@@ -166,8 +169,8 @@ class FsmBuilder
     public static function overrideTransition(
         string $modelClass,
         string $columnName,
-        string|\Fsm\Contracts\FsmStateEnum|null $fromState,
-        string|\Fsm\Contracts\FsmStateEnum $toState,
+        string|FsmStateEnum|null $fromState,
+        string|FsmStateEnum $toState,
         string $event,
         array $transitionConfig
     ): void {
@@ -194,7 +197,7 @@ class FsmBuilder
      *
      * @param  class-string  $modelClass
      */
-    public static function applyExtensions(string $modelClass, string $columnName, \Fsm\FsmExtensionRegistry $extensionRegistry): void
+    public static function applyExtensions(string $modelClass, string $columnName, FsmExtensionRegistry $extensionRegistry): void
     {
         // Apply extensions
         $extensions = $extensionRegistry->getExtensionsFor($modelClass, $columnName);
@@ -204,7 +207,7 @@ class FsmBuilder
                 $extension->extend($modelClass, $columnName, $builder);
             } catch (\Throwable $e) {
                 // Log the error and continue with other extensions
-                \Illuminate\Support\Facades\Log::error("Failed to apply FSM extension {$extension->getName()}: ".$e->getMessage(), [
+                Log::error("Failed to apply FSM extension {$extension->getName()}: ".$e->getMessage(), [
                     'model' => $modelClass,
                     'column' => $columnName,
                     'extension' => get_class($extension),

@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Fsm\Data\StateTimeAnalysisData;
 use Fsm\Data\StateTimelineEntryData;
+use Fsm\Models\FsmLog;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -35,7 +36,7 @@ class FsmHistoryService
      */
     private function getFsmLogModelClass(): string
     {
-        return $this->config->get('fsm.models.fsm_log', \Fsm\Models\FsmLog::class);
+        return $this->config->get('fsm.models.fsm_log', FsmLog::class);
     }
 
     /**
@@ -84,7 +85,7 @@ class FsmHistoryService
         }
 
         return $query->get()->map(function (Model $log): StateTimelineEntryData {
-            /** @var \Fsm\Models\FsmLog $log */
+            /** @var FsmLog $log */
             return StateTimelineEntryData::from([
                 'id' => $log->id,
                 'model_id' => $log->model_id,

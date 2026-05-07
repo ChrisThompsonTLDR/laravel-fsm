@@ -7,6 +7,7 @@ namespace Tests\Unit\Fsm\Services;
 use Fsm\Models\FsmEventLog;
 use Fsm\Services\FsmReplayService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Orchestra\Testbench\TestCase;
 
 /**
@@ -902,7 +903,7 @@ class FsmReplayServiceEdgeCasesTest extends TestCase
             $log = new FsmEventLog;
             $log->timestamps = false; // Disable timestamps
             $log->fill([
-                'id' => \Illuminate\Support\Str::uuid(),
+                'id' => Str::uuid(),
                 'model_id' => '123',
                 'model_type' => 'TestModel',
                 'column_name' => 'status',

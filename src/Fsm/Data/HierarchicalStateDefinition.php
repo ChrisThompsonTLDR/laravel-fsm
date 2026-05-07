@@ -13,8 +13,8 @@ use Illuminate\Support\Collection;
 class HierarchicalStateDefinition extends StateDefinition
 {
     /**
-     * @param  array<int, TransitionCallback>|\Illuminate\Support\Collection<int, TransitionCallback>  $onEntryCallbacks
-     * @param  array<int, TransitionCallback>|\Illuminate\Support\Collection<int, TransitionCallback>  $onExitCallbacks
+     * @param  array<int, TransitionCallback>|Collection<int, TransitionCallback>  $onEntryCallbacks
+     * @param  array<int, TransitionCallback>|Collection<int, TransitionCallback>  $onExitCallbacks
      * @param  array<string, mixed>  $metadata
      */
     public function __construct(
