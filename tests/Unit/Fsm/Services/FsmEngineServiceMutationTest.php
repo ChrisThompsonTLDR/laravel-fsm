@@ -8,7 +8,13 @@ use Fsm\Contracts\FsmStateEnum;
 use Fsm\Data\Dto;
 use Fsm\Data\FsmRuntimeDefinition;
 use Fsm\Data\StateDefinition;
+use Fsm\FsmRegistry;
 use Fsm\Services\FsmEngineService;
+use Fsm\Services\FsmLogger;
+use Fsm\Services\FsmMetricsService;
+use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Eloquent\Model;
 use Mockery;
 use Orchestra\Testbench\TestCase;
@@ -86,17 +92,17 @@ class FsmEngineServiceMutationTest extends TestCase
 
     private function createService(): FsmEngineService
     {
-        $registry = Mockery::mock(\Fsm\FsmRegistry::class);
+        $registry = Mockery::mock(FsmRegistry::class);
         $registry->shouldReceive('getDefinition')->andReturn($this->definition);
 
-        $logger = Mockery::mock(\Fsm\Services\FsmLogger::class);
+        $logger = Mockery::mock(FsmLogger::class);
         $logger->shouldReceive('logTransition')->byDefault();
         $logger->shouldReceive('logFailure')->byDefault();
 
-        $db = Mockery::mock(\Illuminate\Database\DatabaseManager::class);
+        $db = Mockery::mock(DatabaseManager::class);
         $db->shouldReceive('transaction')->andReturnUsing(fn ($cb) => $cb());
 
-        $config = Mockery::mock(\Illuminate\Contracts\Config\Repository::class);
+        $config = Mockery::mock(Repository::class);
         $config->shouldReceive('get')->with('fsm.use_transactions', true)->andReturn(false);
         $config->shouldReceive('get')->with('fsm.logging.enabled', true)->andReturn(true);
         $config->shouldReceive('get')->with('fsm.logging.log_failures', true)->andReturn(true);
@@ -104,9 +110,9 @@ class FsmEngineServiceMutationTest extends TestCase
         $config->shouldReceive('get')->with('fsm.logging.excluded_context_properties', [])->andReturn([]);
         $config->shouldReceive('get')->with('fsm.debug', false)->andReturn(false);
 
-        $dispatcher = Mockery::mock(\Illuminate\Contracts\Events\Dispatcher::class);
+        $dispatcher = Mockery::mock(Dispatcher::class);
         $dispatcher->shouldReceive('dispatch')->andReturn(null);
-        $metrics = new \Fsm\Services\FsmMetricsService($dispatcher);
+        $metrics = new FsmMetricsService($dispatcher);
 
         return new FsmEngineService($registry, $logger, $metrics, $db, $config);
     }
@@ -390,7 +396,7 @@ class FsmEngineServiceMutationTest extends TestCase
         // Test with different config scenarios to catch mutations in default value handling
 
         // Create a simple test DTO with the properties we need to test
-        $testDto = new class(['sensitive' => 'secret', 'normal' => 'visible']) extends \Fsm\Data\Dto
+        $testDto = new class(['sensitive' => 'secret', 'normal' => 'visible']) extends Dto
         {
             public string $sensitive;
 

@@ -7,6 +7,8 @@ namespace Tests\Unit\Fsm\Services;
 use Fsm\Constants;
 use Fsm\Services\BootstrapDetector;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Database\Connection;
+use Illuminate\Database\DatabaseManager;
 use PHPUnit\Framework\TestCase;
 
 class BootstrapDetectorComprehensiveTest extends TestCase
@@ -36,8 +38,8 @@ class BootstrapDetectorComprehensiveTest extends TestCase
         });
 
         // Mock successful database connection
-        $dbMock = $this->createMock(\Illuminate\Database\DatabaseManager::class);
-        $connectionMock = $this->createMock(\Illuminate\Database\Connection::class);
+        $dbMock = $this->createMock(DatabaseManager::class);
+        $connectionMock = $this->createMock(Connection::class);
         $connectionMock->method('getPdo')->willReturn($this->createMock(\PDO::class));
 
         $dbMock->method('connection')->willReturn($connectionMock);
@@ -147,8 +149,8 @@ class BootstrapDetectorComprehensiveTest extends TestCase
         $this->app->method('bound')->willReturn(true);
 
         // Mock database manager with proper connection
-        $dbMock = $this->createMock(\Illuminate\Database\DatabaseManager::class);
-        $connectionMock = $this->createMock(\Illuminate\Database\Connection::class);
+        $dbMock = $this->createMock(DatabaseManager::class);
+        $connectionMock = $this->createMock(Connection::class);
         $connectionMock->method('getPdo')->willReturn($this->createMock(\PDO::class));
 
         $dbMock->method('connection')->willReturn($connectionMock);
@@ -169,8 +171,8 @@ class BootstrapDetectorComprehensiveTest extends TestCase
         $this->app->method('bound')->willReturn(true);
 
         // Mock database manager with proper connection
-        $dbMock = $this->createMock(\Illuminate\Database\DatabaseManager::class);
-        $connectionMock = $this->createMock(\Illuminate\Database\Connection::class);
+        $dbMock = $this->createMock(DatabaseManager::class);
+        $connectionMock = $this->createMock(Connection::class);
         $connectionMock->method('getPdo')->willReturn($this->createMock(\PDO::class));
 
         $dbMock->method('connection')->willReturn($connectionMock);
@@ -191,8 +193,8 @@ class BootstrapDetectorComprehensiveTest extends TestCase
         $this->app->method('bound')->willReturn(true);
 
         // Mock database manager with proper connection
-        $dbMock = $this->createMock(\Illuminate\Database\DatabaseManager::class);
-        $connectionMock = $this->createMock(\Illuminate\Database\Connection::class);
+        $dbMock = $this->createMock(DatabaseManager::class);
+        $connectionMock = $this->createMock(Connection::class);
         $connectionMock->method('getPdo')->willReturn($this->createMock(\PDO::class));
 
         $dbMock->method('connection')->willReturn($connectionMock);
@@ -224,8 +226,8 @@ class BootstrapDetectorComprehensiveTest extends TestCase
         $this->app->method('runningInConsole')->willReturn(true);
         $this->app->method('bound')->with('db')->willReturn(true);
 
-        $dbMock = $this->createMock(\Illuminate\Database\DatabaseManager::class);
-        $connectionMock = $this->createMock(\Illuminate\Database\Connection::class);
+        $dbMock = $this->createMock(DatabaseManager::class);
+        $connectionMock = $this->createMock(Connection::class);
 
         $this->app->method('make')->with('db')->willReturn($dbMock);
         $dbMock->method('connection')->willReturn($connectionMock);
@@ -246,8 +248,8 @@ class BootstrapDetectorComprehensiveTest extends TestCase
         $this->app->method('bound')->willReturn(true);
 
         // Mock database manager with proper connection
-        $dbMock = $this->createMock(\Illuminate\Database\DatabaseManager::class);
-        $connectionMock = $this->createMock(\Illuminate\Database\Connection::class);
+        $dbMock = $this->createMock(DatabaseManager::class);
+        $connectionMock = $this->createMock(Connection::class);
         $connectionMock->method('getPdo')->willReturn($this->createMock(\PDO::class));
 
         $dbMock->method('connection')->willReturn($connectionMock);
@@ -313,8 +315,8 @@ class BootstrapDetectorComprehensiveTest extends TestCase
         $this->app->method('bound')->willReturn(true);
 
         // Mock database manager with proper connection
-        $dbMock = $this->createMock(\Illuminate\Database\DatabaseManager::class);
-        $connectionMock = $this->createMock(\Illuminate\Database\Connection::class);
+        $dbMock = $this->createMock(DatabaseManager::class);
+        $connectionMock = $this->createMock(Connection::class);
         $connectionMock->method('getPdo')->willReturn($this->createMock(\PDO::class));
 
         $dbMock->method('connection')->willReturn($connectionMock);
@@ -335,8 +337,8 @@ class BootstrapDetectorComprehensiveTest extends TestCase
         $this->app->method('bound')->willReturn(true);
 
         // Mock database manager with proper connection
-        $dbMock = $this->createMock(\Illuminate\Database\DatabaseManager::class);
-        $connectionMock = $this->createMock(\Illuminate\Database\Connection::class);
+        $dbMock = $this->createMock(DatabaseManager::class);
+        $connectionMock = $this->createMock(Connection::class);
         $connectionMock->method('getPdo')->willReturn($this->createMock(\PDO::class));
 
         $dbMock->method('connection')->willReturn($connectionMock);
@@ -373,8 +375,8 @@ class BootstrapDetectorComprehensiveTest extends TestCase
         $this->app->method('bound')->willReturn(true);
 
         // Mock database manager with proper connection
-        $dbMock = $this->createMock(\Illuminate\Database\DatabaseManager::class);
-        $connectionMock = $this->createMock(\Illuminate\Database\Connection::class);
+        $dbMock = $this->createMock(DatabaseManager::class);
+        $connectionMock = $this->createMock(Connection::class);
         $connectionMock->method('getPdo')->willReturn($this->createMock(\PDO::class));
 
         $dbMock->method('connection')->willReturn($connectionMock);
@@ -399,8 +401,8 @@ class BootstrapDetectorComprehensiveTest extends TestCase
         });
 
         // Mock successful database connection
-        $dbMock = $this->createMock(\Illuminate\Database\DatabaseManager::class);
-        $connectionMock = $this->createMock(\Illuminate\Database\Connection::class);
+        $dbMock = $this->createMock(DatabaseManager::class);
+        $connectionMock = $this->createMock(Connection::class);
         $connectionMock->method('getPdo')->willReturn($this->createMock(\PDO::class));
 
         $dbMock->method('connection')->willReturn($connectionMock);

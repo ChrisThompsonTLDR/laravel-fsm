@@ -122,9 +122,9 @@ class TransitionDefinition extends Dto
 
     /**
      * @param  FsmStateEnum|string|null|array<string, mixed>  $fromState
-     * @param  array<int, TransitionGuard>|\Illuminate\Support\Collection<int, TransitionGuard>  $guards
-     * @param  array<int, TransitionAction>|\Illuminate\Support\Collection<int, TransitionAction>  $actions
-     * @param  array<int, TransitionCallback>|\Illuminate\Support\Collection<int, TransitionCallback>  $onTransitionCallbacks
+     * @param  array<int, TransitionGuard>|Collection<int, TransitionGuard>  $guards
+     * @param  array<int, TransitionAction>|Collection<int, TransitionAction>  $actions
+     * @param  array<int, TransitionCallback>|Collection<int, TransitionCallback>  $onTransitionCallbacks
      * @param  array<string, mixed>  $metadata
      */
     public function __construct(
@@ -216,7 +216,7 @@ class TransitionDefinition extends Dto
         $hasToStateKey = array_key_exists('toState', $data) || array_key_exists('to_state', $data);
 
         if (! $hasToStateKey) {
-            throw new \InvalidArgumentException('Array-based initialization requires an associative array with a "toState" or "to_state" key.');
+            throw new InvalidArgumentException('Array-based initialization requires an associative array with a "toState" or "to_state" key.');
         }
 
         $toStateValue = $data['toState'] ?? $data['to_state'] ?? null;
@@ -227,72 +227,72 @@ class TransitionDefinition extends Dto
         $fromStateValue = $data['fromState'] ?? $data['from_state'] ?? null;
         if ($fromStateValue !== null) {
             if (! is_string($fromStateValue) && ! ($fromStateValue instanceof FsmStateEnum)) {
-                throw new \InvalidArgumentException(
+                throw new InvalidArgumentException(
                     'The "fromState" value must be a string, FsmStateEnum, or null, got: '.get_debug_type($fromStateValue)
                 );
             }
         }
 
         if ($toStateValue !== null && ! is_string($toStateValue) && ! ($toStateValue instanceof FsmStateEnum)) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The "toState" value must be a string, FsmStateEnum, or null, got: '.get_debug_type($toStateValue)
             );
         }
 
         // Validate optional string properties
         if (array_key_exists('event', $data) && $data['event'] !== null && ! is_string($data['event'])) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The "event" value must be a string or null, got: '.get_debug_type($data['event'])
             );
         }
 
         if (array_key_exists('description', $data) && $data['description'] !== null && ! is_string($data['description'])) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The "description" value must be a string or null, got: '.get_debug_type($data['description'])
             );
         }
 
         if (array_key_exists('type', $data) && ! is_string($data['type'])) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The "type" value must be a string, got: '.get_debug_type($data['type'])
             );
         }
 
         if (array_key_exists('behavior', $data) && ! is_string($data['behavior'])) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The "behavior" value must be a string, got: '.get_debug_type($data['behavior'])
             );
         }
 
         if (array_key_exists('guardEvaluation', $data) && ! is_string($data['guardEvaluation'])) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The "guardEvaluation" value must be a string, got: '.get_debug_type($data['guardEvaluation'])
             );
         }
 
         // Validate integer properties
         if (array_key_exists('priority', $data) && ! is_int($data['priority'])) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The "priority" value must be an integer, got: '.get_debug_type($data['priority'])
             );
         }
 
         if (array_key_exists('timeout', $data) && ! is_int($data['timeout'])) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The "timeout" value must be an integer, got: '.get_debug_type($data['timeout'])
             );
         }
 
         // Validate boolean properties
         if (array_key_exists('isReversible', $data) && ! is_bool($data['isReversible'])) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The "isReversible" value must be a boolean, got: '.get_debug_type($data['isReversible'])
             );
         }
 
         // Validate array properties
         if (array_key_exists('metadata', $data) && ! is_array($data['metadata'])) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The "metadata" value must be an array, got: '.get_debug_type($data['metadata'])
             );
         }
@@ -321,28 +321,28 @@ class TransitionDefinition extends Dto
     ): void {
         // Validate fromState type
         if ($fromState !== null && ! is_string($fromState) && ! ($fromState instanceof FsmStateEnum)) { // @phpstan-ignore-line
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The "fromState" parameter must be a string, FsmStateEnum, or null, got: '.get_debug_type($fromState)
             );
         }
 
         // Validate toState type
         if ($toState !== null && ! is_string($toState) && ! ($toState instanceof FsmStateEnum)) { // @phpstan-ignore-line
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The "toState" parameter must be a string, FsmStateEnum, or null, got: '.get_debug_type($toState)
             );
         }
 
         // Validate event type
         if ($event !== null && ! is_string($event)) { // @phpstan-ignore-line
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The "event" parameter must be a string or null, got: '.get_debug_type($event)
             );
         }
 
         // Validate description type
         if ($description !== null && ! is_string($description)) { // @phpstan-ignore-line
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'The "description" parameter must be a string or null, got: '.get_debug_type($description)
             );
         }

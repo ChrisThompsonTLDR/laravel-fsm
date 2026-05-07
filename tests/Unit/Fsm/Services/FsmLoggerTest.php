@@ -6,7 +6,9 @@ namespace Tests\Unit\Fsm\Services;
 
 use Fsm\Contracts\FsmStateEnum;
 use Fsm\Data\Dto;
+use Fsm\Models\FsmLog;
 use Fsm\Services\FsmLogger;
+use Fsm\Services\FsmReplayService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Config;
@@ -16,9 +18,10 @@ use Orchestra\Testbench\TestCase;
 use ReflectionClass;
 use Tests\Models\TestUser;
 use Thunk\Verbs\Contracts\BrokersEvents;
+use Thunk\Verbs\Event;
 use Thunk\Verbs\Facades\Verbs;
 
-mutates(\Fsm\Services\FsmLogger::class);
+mutates(FsmLogger::class);
 
 // Mock Enum for testing
 enum MockStateForLog: string implements FsmStateEnum
@@ -95,7 +98,7 @@ class FsmLoggerTest extends TestCase
         $app['config']->set('fsm.logging.enabled', true);
         $app['config']->set('fsm.logging.log_failures', true);
         $app['config']->set('fsm.logging.exception_character_limit', 1000);
-        $app['config']->set('fsm.models.fsm_log', \Fsm\Models\FsmLog::class);
+        $app['config']->set('fsm.models.fsm_log', FsmLog::class);
     }
 
     protected function getPackageProviders($app)
@@ -180,7 +183,7 @@ class FsmLoggerTest extends TestCase
         ]);
 
         // Check that the exception details field exists and starts with the expected exception message
-        $logEntry = \Fsm\Models\FsmLog::where('model_id', $model->id)->first();
+        $logEntry = FsmLog::where('model_id', $model->id)->first();
         $this->assertNotNull($logEntry);
         $this->assertNotNull($logEntry->exception_details);
         $this->assertStringStartsWith('RuntimeException: Something went wrong here', $logEntry->exception_details);
@@ -239,7 +242,7 @@ class FsmLoggerTest extends TestCase
         {
             public function __construct(private string $id) {}
 
-            public function fire(\Thunk\Verbs\Event $event): ?\Thunk\Verbs\Event
+            public function fire(Event $event): ?Event
             {
                 return $event;
             }
@@ -249,12 +252,12 @@ class FsmLoggerTest extends TestCase
                 return true;
             }
 
-            public function isAuthorized(\Thunk\Verbs\Event $event): bool
+            public function isAuthorized(Event $event): bool
             {
                 return true;
             }
 
-            public function isValid(\Thunk\Verbs\Event $event): bool
+            public function isValid(Event $event): bool
             {
                 return true;
             }
@@ -296,7 +299,7 @@ class FsmLoggerTest extends TestCase
                 $this->user_id = $id;
             }
 
-            public function fire(\Thunk\Verbs\Event $event): ?\Thunk\Verbs\Event
+            public function fire(Event $event): ?Event
             {
                 return $event;
             }
@@ -306,12 +309,12 @@ class FsmLoggerTest extends TestCase
                 return true;
             }
 
-            public function isAuthorized(\Thunk\Verbs\Event $event): bool
+            public function isAuthorized(Event $event): bool
             {
                 return true;
             }
 
-            public function isValid(\Thunk\Verbs\Event $event): bool
+            public function isValid(Event $event): bool
             {
                 return true;
             }
@@ -351,7 +354,7 @@ class FsmLoggerTest extends TestCase
                 $this->user_id = $id;
             }
 
-            public function fire(\Thunk\Verbs\Event $event): ?\Thunk\Verbs\Event
+            public function fire(Event $event): ?Event
             {
                 return $event;
             }
@@ -361,12 +364,12 @@ class FsmLoggerTest extends TestCase
                 return true;
             }
 
-            public function isAuthorized(\Thunk\Verbs\Event $event): bool
+            public function isAuthorized(Event $event): bool
             {
                 return true;
             }
 
-            public function isValid(\Thunk\Verbs\Event $event): bool
+            public function isValid(Event $event): bool
             {
                 return true;
             }
@@ -399,7 +402,7 @@ class FsmLoggerTest extends TestCase
             {
                 public function __construct(private $id) {}
 
-                public function fire(\Thunk\Verbs\Event $event): ?\Thunk\Verbs\Event
+                public function fire(Event $event): ?Event
                 {
                     return $event;
                 }
@@ -409,12 +412,12 @@ class FsmLoggerTest extends TestCase
                     return true;
                 }
 
-                public function isAuthorized(\Thunk\Verbs\Event $event): bool
+                public function isAuthorized(Event $event): bool
                 {
                     return true;
                 }
 
-                public function isValid(\Thunk\Verbs\Event $event): bool
+                public function isValid(Event $event): bool
                 {
                     return true;
                 }
@@ -430,11 +433,11 @@ class FsmLoggerTest extends TestCase
             Verbs::swap($mockBroker);
             $model = $this->createTestModel();
             $this->logger->logSuccess($model, 'status_column', MockStateForLog::LogFrom, MockStateForLog::LogTo, null, null, 0);
-            $log = \Fsm\Models\FsmLog::where('model_id', $model->id)->first();
+            $log = FsmLog::where('model_id', $model->id)->first();
             $this->assertNull($log->subject_id, 'subject_id should not be set for user_id: '.var_export($falsy, true));
             $this->assertNull($log->subject_type, 'subject_type should not be set for user_id: '.var_export($falsy, true));
             // Clean up for next iteration
-            \Fsm\Models\FsmLog::query()->delete();
+            FsmLog::query()->delete();
         }
     }
 
@@ -579,7 +582,7 @@ class FsmLoggerTest extends TestCase
         // Test with Verbs instance that doesn't have state method - mutations that change method_exists should be caught
         $mockBroker = new class implements BrokersEvents
         {
-            public function fire(\Thunk\Verbs\Event $event): ?\Thunk\Verbs\Event
+            public function fire(Event $event): ?Event
             {
                 return $event;
             }
@@ -589,12 +592,12 @@ class FsmLoggerTest extends TestCase
                 return true;
             }
 
-            public function isAuthorized(\Thunk\Verbs\Event $event): bool
+            public function isAuthorized(Event $event): bool
             {
                 return true;
             }
 
-            public function isValid(\Thunk\Verbs\Event $event): bool
+            public function isValid(Event $event): bool
             {
                 return true;
             }
@@ -631,19 +634,19 @@ class FsmLoggerTest extends TestCase
 
         $this->logger->logFailure($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'test', null, $exception, 0);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'test')->first();
+        $logEntry = FsmLog::where('transition_event', 'test')->first();
         $this->assertNotNull($logEntry);
         // Str::limit includes the exception class name, so allow for some overhead
         $this->assertLessThanOrEqual(120, strlen($logEntry->exception_details));
 
         // Clean up
-        \Fsm\Models\FsmLog::query()->delete();
+        FsmLog::query()->delete();
 
         // Test with limit of 50 - should be shorter
         Config::set('fsm.logging.exception_character_limit', 50);
         $this->logger->logFailure($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'test2', null, $exception, 0);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'test2')->first();
+        $logEntry = FsmLog::where('transition_event', 'test2')->first();
         $this->assertNotNull($logEntry);
         $this->assertLessThanOrEqual(70, strlen($logEntry->exception_details));
     }
@@ -866,19 +869,19 @@ class FsmLoggerTest extends TestCase
 
         $this->logger->logFailure($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'test', null, $exception, 0);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'test')->first();
+        $logEntry = FsmLog::where('transition_event', 'test')->first();
         $this->assertNotNull($logEntry);
         // Should be very short or empty
         $this->assertLessThanOrEqual(50, strlen($logEntry->exception_details));
 
         // Clean up
-        \Fsm\Models\FsmLog::query()->delete();
+        FsmLog::query()->delete();
 
         // Test with very large limit
         Config::set('fsm.logging.exception_character_limit', 10000);
         $this->logger->logFailure($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'test2', null, $exception, 0);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'test2')->first();
+        $logEntry = FsmLog::where('transition_event', 'test2')->first();
         $this->assertNotNull($logEntry);
         // Should contain the full exception message
         $this->assertGreaterThan(1000, strlen($logEntry->exception_details));
@@ -926,14 +929,14 @@ class FsmLoggerTest extends TestCase
         // Test success logging message format
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'test_event', $context, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'test_event')->first();
+        $logEntry = FsmLog::where('transition_event', 'test_event')->first();
         $this->assertNotNull($logEntry);
 
         // Test failure logging message format
         $exception = new \RuntimeException('Test error');
         $this->logger->logFailure($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'fail_event', $context, $exception, 200);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'fail_event')->first();
+        $logEntry = FsmLog::where('transition_event', 'fail_event')->first();
         $this->assertNotNull($logEntry);
         $this->assertNotNull($logEntry->exception_details);
         $this->assertStringStartsWith('RuntimeException: Test error', $logEntry->exception_details);
@@ -954,8 +957,8 @@ class FsmLoggerTest extends TestCase
         $this->logger->logFailure($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'fail_event', $context, $exception, 200);
 
         // Verify log entries were created with correct data
-        $successLog = \Fsm\Models\FsmLog::where('transition_event', 'success_event')->first();
-        $failureLog = \Fsm\Models\FsmLog::where('transition_event', 'fail_event')->first();
+        $successLog = FsmLog::where('transition_event', 'success_event')->first();
+        $failureLog = FsmLog::where('transition_event', 'fail_event')->first();
 
         $this->assertNotNull($successLog);
         $this->assertNotNull($failureLog);
@@ -976,7 +979,7 @@ class FsmLoggerTest extends TestCase
         // Test that logging works with default configuration
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'default_test', $context, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'default_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'default_test')->first();
         $this->assertNotNull($logEntry);
         $this->assertEquals(100, $logEntry->duration_ms);
     }
@@ -989,7 +992,7 @@ class FsmLoggerTest extends TestCase
 
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'disabled_test', null, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'disabled_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'disabled_test')->first();
         $this->assertNull($logEntry);
 
         // Re-enable logging for other tests
@@ -1005,7 +1008,7 @@ class FsmLoggerTest extends TestCase
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'null_channel_test', null, 100);
 
         // Should still create log entry in database when channel is null (mutations that bypass null check should be caught)
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'null_channel_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'null_channel_test')->first();
         $this->assertNotNull($logEntry); // Database entry should still be created
 
         // Test with empty string channel
@@ -1013,14 +1016,14 @@ class FsmLoggerTest extends TestCase
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'empty_channel_test', null, 100);
 
         // Database entry should still be created even with empty channel (mutations that bypass empty check should be caught)
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'empty_channel_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'empty_channel_test')->first();
         $this->assertNotNull($logEntry);
 
         // Test with valid channel - should work
         Config::set('fsm.logging.channel', 'stack');
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'valid_channel_test', null, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'valid_channel_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'valid_channel_test')->first();
         $this->assertNotNull($logEntry);
 
         // Reset for other tests
@@ -1037,7 +1040,7 @@ class FsmLoggerTest extends TestCase
         Config::set('fsm.logging.structured', false);
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'structured_disabled', $context, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'structured_disabled')->first();
+        $logEntry = FsmLog::where('transition_event', 'structured_disabled')->first();
         $this->assertNotNull($logEntry);
         $this->assertIsArray($logEntry->context_snapshot); // Context is always stored as array in database
 
@@ -1045,7 +1048,7 @@ class FsmLoggerTest extends TestCase
         Config::set('fsm.logging.structured', true);
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'structured_enabled', $context, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'structured_enabled')->first();
+        $logEntry = FsmLog::where('transition_event', 'structured_enabled')->first();
         $this->assertNotNull($logEntry);
         $this->assertIsArray($logEntry->context_snapshot); // Context is always stored as array in database
 
@@ -1070,8 +1073,8 @@ class FsmLoggerTest extends TestCase
         $this->logger->logFailure($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'failure_format_test', $context, $exception, 200);
 
         // Both should create log entries (mutations that prevent logging should be caught)
-        $successLog = \Fsm\Models\FsmLog::where('transition_event', 'success_format_test')->first();
-        $failureLog = \Fsm\Models\FsmLog::where('transition_event', 'failure_format_test')->first();
+        $successLog = FsmLog::where('transition_event', 'success_format_test')->first();
+        $failureLog = FsmLog::where('transition_event', 'failure_format_test')->first();
 
         $this->assertNotNull($successLog);
         $this->assertNotNull($failureLog);
@@ -1091,7 +1094,7 @@ class FsmLoggerTest extends TestCase
         // Test that all required fields are present in log data - mutations that remove array items should be caught
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'completeness_test', $context, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'completeness_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'completeness_test')->first();
         $this->assertNotNull($logEntry);
 
         // Verify that mutations removing required fields would be caught
@@ -1109,7 +1112,7 @@ class FsmLoggerTest extends TestCase
         $exception = new \RuntimeException('Test error');
         $this->logger->logFailure($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'fail_completeness_test', $context, $exception, 200);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'fail_completeness_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'fail_completeness_test')->first();
         $this->assertNotNull($logEntry);
         $this->assertNotNull($logEntry->exception_details);
     }
@@ -1122,13 +1125,13 @@ class FsmLoggerTest extends TestCase
         // Test that FsmLog::create() method is called - mutations that remove this should be caught
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'create_method_test', $context, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'create_method_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'create_method_test')->first();
         $this->assertNotNull($logEntry);
 
         // Test that logToChannel() method is called - mutations that remove this should be caught
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'channel_method_test', $context, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'channel_method_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'channel_method_test')->first();
         $this->assertNotNull($logEntry);
     }
 
@@ -1140,7 +1143,7 @@ class FsmLoggerTest extends TestCase
         // Mock Verbs state
         $mockBroker = new class implements BrokersEvents
         {
-            public function fire(\Thunk\Verbs\Event $event): ?\Thunk\Verbs\Event
+            public function fire(Event $event): ?Event
             {
                 return $event;
             }
@@ -1150,12 +1153,12 @@ class FsmLoggerTest extends TestCase
                 return true;
             }
 
-            public function isAuthorized(\Thunk\Verbs\Event $event): bool
+            public function isAuthorized(Event $event): bool
             {
                 return true;
             }
 
-            public function isValid(\Thunk\Verbs\Event $event): bool
+            public function isValid(Event $event): bool
             {
                 return true;
             }
@@ -1177,7 +1180,7 @@ class FsmLoggerTest extends TestCase
         // Test that subject data is merged with log data - mutations that remove array_merge should be caught
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'merge_mutation_test', $context, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'merge_mutation_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'merge_mutation_test')->first();
         $this->assertNotNull($logEntry);
 
         // Verify subject data is properly merged (mutations that prevent merging should be caught)
@@ -1198,14 +1201,14 @@ class FsmLoggerTest extends TestCase
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'concat_test', $context, 100);
 
         // The log entry should be created (mutations that break concatenation should be caught)
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'concat_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'concat_test')->first();
         $this->assertNotNull($logEntry);
         $this->assertIsArray($logEntry->context_snapshot);
 
         // Test with empty context - mutations that change empty() checks should be caught
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'empty_concat_test', null, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'empty_concat_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'empty_concat_test')->first();
         $this->assertNotNull($logEntry);
         $this->assertNull($logEntry->context_snapshot);
 
@@ -1225,7 +1228,7 @@ class FsmLoggerTest extends TestCase
 
         $this->logger->logFailure($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'long_exception_test', $context, $exception, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'long_exception_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'long_exception_test')->first();
         $this->assertNotNull($logEntry);
         $this->assertNotNull($logEntry->exception_details);
         $this->assertStringStartsWith('RuntimeException: ', $logEntry->exception_details);
@@ -1234,7 +1237,7 @@ class FsmLoggerTest extends TestCase
         Config::set('fsm.logging.exception_character_limit', 100);
         $this->logger->logFailure($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'limit_test', $context, $exception, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'limit_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'limit_test')->first();
         $this->assertNotNull($logEntry);
         $this->assertLessThanOrEqual(120, strlen($logEntry->exception_details));
 
@@ -1252,7 +1255,7 @@ class FsmLoggerTest extends TestCase
         $model = $this->createTestModel();
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'verbs_disabled_test', null, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'verbs_disabled_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'verbs_disabled_test')->first();
         $this->assertNotNull($logEntry);
         $this->assertNull($logEntry->subject_id); // Should be null when Verbs is disabled
 
@@ -1261,7 +1264,7 @@ class FsmLoggerTest extends TestCase
         // Clear any existing Verbs state by not setting up the mock broker
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'no_state_test', null, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'no_state_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'no_state_test')->first();
         $this->assertNotNull($logEntry);
         $this->assertNull($logEntry->subject_id); // Should be null when no Verbs state exists
 
@@ -1279,13 +1282,13 @@ class FsmLoggerTest extends TestCase
 
         $this->logger->logFailure($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'no_fail_log', null, $exception, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'no_fail_log')->first();
+        $logEntry = FsmLog::where('transition_event', 'no_fail_log')->first();
         $this->assertNull($logEntry);
 
         // But success logging should still work
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'success_still_works', null, 100);
 
-        $successLog = \Fsm\Models\FsmLog::where('transition_event', 'success_still_works')->first();
+        $successLog = FsmLog::where('transition_event', 'success_still_works')->first();
         $this->assertNotNull($successLog);
 
         // Re-enable failure logging
@@ -1300,7 +1303,7 @@ class FsmLoggerTest extends TestCase
         // Mock Verbs state
         $mockBroker = new class implements BrokersEvents
         {
-            public function fire(\Thunk\Verbs\Event $event): ?\Thunk\Verbs\Event
+            public function fire(Event $event): ?Event
             {
                 return $event;
             }
@@ -1310,12 +1313,12 @@ class FsmLoggerTest extends TestCase
                 return true;
             }
 
-            public function isAuthorized(\Thunk\Verbs\Event $event): bool
+            public function isAuthorized(Event $event): bool
             {
                 return true;
             }
 
-            public function isValid(\Thunk\Verbs\Event $event): bool
+            public function isValid(Event $event): bool
             {
                 return true;
             }
@@ -1334,7 +1337,7 @@ class FsmLoggerTest extends TestCase
         $model = $this->createTestModel();
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'subject_test', null, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'subject_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'subject_test')->first();
         $this->assertNotNull($logEntry);
         $this->assertEquals('test-user-123', $logEntry->subject_id);
         $this->assertEquals(TestUser::class, $logEntry->subject_type);
@@ -1348,7 +1351,7 @@ class FsmLoggerTest extends TestCase
         // Test success logging preserves all data fields
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'structure_test', $context, 150);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'structure_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'structure_test')->first();
         $this->assertNotNull($logEntry);
 
         // Verify all expected fields are present and correct
@@ -1558,14 +1561,14 @@ class FsmLoggerTest extends TestCase
         $method->setAccessible(true);
 
         // Test when Verbs class doesn't exist
-        if (! class_exists(\Thunk\Verbs\Facades\Verbs::class)) {
+        if (! class_exists(Verbs::class)) {
             $result = $method->invoke($this->logger);
             $this->assertNull($result);
         } else {
             // Test with actual Verbs setup
             $mockBroker = new class implements BrokersEvents
             {
-                public function fire(\Thunk\Verbs\Event $event): ?\Thunk\Verbs\Event
+                public function fire(Event $event): ?Event
                 {
                     return $event;
                 }
@@ -1575,12 +1578,12 @@ class FsmLoggerTest extends TestCase
                     return true;
                 }
 
-                public function isAuthorized(\Thunk\Verbs\Event $event): bool
+                public function isAuthorized(Event $event): bool
                 {
                     return true;
                 }
 
-                public function isValid(\Thunk\Verbs\Event $event): bool
+                public function isValid(Event $event): bool
                 {
                     return true;
                 }
@@ -1627,7 +1630,7 @@ class FsmLoggerTest extends TestCase
         $model = $this->createTestModel();
         $this->logger->logFailure($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'truncation_test', null, $exception, 0);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'truncation_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'truncation_test')->first();
         $this->assertNotNull($logEntry);
         $this->assertNotNull($logEntry->exception_details);
 
@@ -1638,7 +1641,7 @@ class FsmLoggerTest extends TestCase
         Config::set('fsm.logging.exception_character_limit', 100);
         $this->logger->logFailure($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'short_test', null, $exception, 0);
 
-        $shortLog = \Fsm\Models\FsmLog::where('transition_event', 'short_test')->first();
+        $shortLog = FsmLog::where('transition_event', 'short_test')->first();
         $this->assertNotNull($shortLog);
         $this->assertLessThanOrEqual(120, strlen($shortLog->exception_details));
 
@@ -1654,7 +1657,7 @@ class FsmLoggerTest extends TestCase
         // Mock Verbs state
         $mockBroker = new class implements BrokersEvents
         {
-            public function fire(\Thunk\Verbs\Event $event): ?\Thunk\Verbs\Event
+            public function fire(Event $event): ?Event
             {
                 return $event;
             }
@@ -1664,12 +1667,12 @@ class FsmLoggerTest extends TestCase
                 return true;
             }
 
-            public function isAuthorized(\Thunk\Verbs\Event $event): bool
+            public function isAuthorized(Event $event): bool
             {
                 return true;
             }
 
-            public function isValid(\Thunk\Verbs\Event $event): bool
+            public function isValid(Event $event): bool
             {
                 return true;
             }
@@ -1690,7 +1693,7 @@ class FsmLoggerTest extends TestCase
 
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'merge_test', $context, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'merge_test')->first();
+        $logEntry = FsmLog::where('transition_event', 'merge_test')->first();
         $this->assertNotNull($logEntry);
 
         // Verify subject data is properly merged with log data
@@ -1708,7 +1711,7 @@ class FsmLoggerTest extends TestCase
         // Test that all expected fields are present in log data
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'test_event', $context, 100);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'test_event')->first();
+        $logEntry = FsmLog::where('transition_event', 'test_event')->first();
         $this->assertNotNull($logEntry);
 
         // Verify that mutations removing required fields would be caught
@@ -1725,7 +1728,7 @@ class FsmLoggerTest extends TestCase
         $exception = new \RuntimeException('Test error');
         $this->logger->logFailure($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'fail_event', $context, $exception, 200);
 
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'fail_event')->first();
+        $logEntry = FsmLog::where('transition_event', 'fail_event')->first();
         $this->assertNotNull($logEntry);
         $this->assertNotNull($logEntry->exception_details);
     }
@@ -1742,7 +1745,7 @@ class FsmLoggerTest extends TestCase
         };
 
         // Use reflection to test the private method
-        $reflection = new \ReflectionClass(FsmLogger::class);
+        $reflection = new ReflectionClass(FsmLogger::class);
         $method = $reflection->getMethod('extractUserId');
         $method->setAccessible(true);
 
@@ -1764,7 +1767,7 @@ class FsmLoggerTest extends TestCase
         };
 
         // Use reflection to test the private method
-        $reflection = new \ReflectionClass(FsmLogger::class);
+        $reflection = new ReflectionClass(FsmLogger::class);
         $method = $reflection->getMethod('extractUserId');
         $method->setAccessible(true);
 
@@ -1789,7 +1792,7 @@ class FsmLoggerTest extends TestCase
         };
 
         // Use reflection to test the private method
-        $reflection = new \ReflectionClass(FsmLogger::class);
+        $reflection = new ReflectionClass(FsmLogger::class);
         $method = $reflection->getMethod('extractUserId');
         $method->setAccessible(true);
 
@@ -1813,7 +1816,7 @@ class FsmLoggerTest extends TestCase
         $this->logger->logSuccess($model, 'status', MockStateForLog::LogFrom, MockStateForLog::LogTo, 'test_event', $context);
 
         // Should log successfully with default configuration
-        $logEntry = \Fsm\Models\FsmLog::where('transition_event', 'test_event')->first();
+        $logEntry = FsmLog::where('transition_event', 'test_event')->first();
         $this->assertNotNull($logEntry);
     }
 
@@ -1822,7 +1825,7 @@ class FsmLoggerTest extends TestCase
      */
     public function test_replay_service_protects_against_empty_strings(): void
     {
-        $replayService = new \Fsm\Services\FsmReplayService;
+        $replayService = new FsmReplayService;
 
         // Test empty modelId
         $this->expectException(\InvalidArgumentException::class);
@@ -1848,7 +1851,7 @@ class FsmLoggerTest extends TestCase
     public function test_custom_fsm_log_model_via_config(): void
     {
         // Create a custom FsmLog model class
-        $customLogClass = new class extends \Fsm\Models\FsmLog
+        $customLogClass = new class extends FsmLog
         {
             protected $table = 'custom_fsm_logs';
         };

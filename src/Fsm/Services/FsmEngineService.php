@@ -20,6 +20,8 @@ use Fsm\Events\TransitionFailed;
 use Fsm\Events\TransitionSucceeded;
 use Fsm\Exceptions\FsmTransitionFailedException;
 use Fsm\FsmRegistry;
+use Fsm\Jobs\RunActionJob;
+use Fsm\Jobs\RunCallbackJob;
 use Fsm\Traits\StateNameStringConversion;
 use Fsm\Verbs\FsmTransitioned;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
@@ -230,7 +232,7 @@ class FsmEngineService
                 'reason' => $e->reason,
                 'message' => $e->getMessage(),
             ];
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Note: TransitionFailed is NOT dispatched for dry runs.
             report($e);
 
@@ -706,7 +708,7 @@ class FsmEngineService
                             throw new \LogicException('Queued callbacks cannot use object instances. Use string callables instead.');
                         }
                         $callableString = $this->stringifyCallable($callable);
-                    } elseif ($callable instanceof \Closure) {
+                    } elseif ($callable instanceof Closure) {
                         throw new \LogicException('Queued callbacks cannot use closures. Use string callables instead.');
                     } elseif (is_object($callable) && method_exists($callable, '__invoke')) {
                         throw new \LogicException('Queued callbacks cannot use invokable objects. Use string callables instead.');
@@ -716,7 +718,7 @@ class FsmEngineService
                         throw new \LogicException('Queued callbacks only support string callables. Unsupported callable type: '.gettype($callable));
                     }
 
-                    \Fsm\Jobs\RunCallbackJob::dispatch(
+                    RunCallbackJob::dispatch(
                         $callableString,
                         $callback->parameters,
                         $this->buildJobPayload($input)
@@ -755,7 +757,7 @@ class FsmEngineService
                     /** @var class-string<\Thunk\Verbs\Event> $verbClass */
                     $verbClass = $action->callable;
                     if ($action->queued) {
-                        \Fsm\Jobs\RunActionJob::dispatch(
+                        RunActionJob::dispatch(
                             $verbClass.'@fire',
                             $action->parameters,
                             $this->buildJobPayload($input)
@@ -775,7 +777,7 @@ class FsmEngineService
                                 throw new \LogicException('Queued actions cannot use object instances. Use string callables instead.');
                             }
                             $callableString = $this->stringifyCallable($callable);
-                        } elseif ($callable instanceof \Closure) {
+                        } elseif ($callable instanceof Closure) {
                             throw new \LogicException('Queued actions cannot use closures. Use string callables instead.');
                         } elseif (is_object($callable) && method_exists($callable, '__invoke')) {
                             throw new \LogicException('Queued actions cannot use invokable objects. Use string callables instead.');
@@ -785,7 +787,7 @@ class FsmEngineService
                             throw new \LogicException('Queued actions only support string callables. Unsupported callable type: '.gettype($callable));
                         }
 
-                        \Fsm\Jobs\RunActionJob::dispatch(
+                        RunActionJob::dispatch(
                             $callableString,
                             $action->parameters,
                             $this->buildJobPayload($input)
@@ -839,7 +841,7 @@ class FsmEngineService
                         ]);
                     }
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $contextSerializationFailed = true;
                 // Only log when not running in PHPUnit tests to avoid polluting test output
                 if (! defined('PHPUNIT_COMPOSER_INSTALL') && ! defined('__PHPUNIT_PHAR__')) {
@@ -903,7 +905,7 @@ class FsmEngineService
      * App::call for class strings and closures, and direct reflection for
      * object instances to ensure proper parameter resolution.
      *
-     * @param  array{0: class-string|object, 1: string}|string|\Closure  $callable
+     * @param  array{0: class-string|object, 1: string}|string|Closure  $callable
      * @param  array<string, mixed>  $parameters
      */
     private function executeCallableWithInstance(mixed $callable, array $parameters): mixed
@@ -978,7 +980,7 @@ class FsmEngineService
             elseif ($paramType !== null && $this->canResolveFromContainer($paramType)) {
                 try {
                     $args[] = $this->resolveFromContainer($paramType);
-                } catch (\Throwable $e) {
+                } catch (Throwable $e) {
                     // If dependency injection fails, fall back to default value or throw error
                     if ($param->isDefaultValueAvailable()) {
                         $args[] = $param->getDefaultValue();
@@ -1039,7 +1041,7 @@ class FsmEngineService
      * @param  \ReflectionType  $paramType  The parameter type to resolve
      * @return mixed The resolved instance
      *
-     * @throws \Throwable If resolution fails
+     * @throws Throwable If resolution fails
      */
     private function resolveFromContainer(\ReflectionType $paramType): mixed
     {
@@ -1132,7 +1134,7 @@ class FsmEngineService
 
             return $instance;
             // @phpstan-ignore catch.neverThrown
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Direct instantiation failed - return original context to avoid data loss
             // Log the failure for debugging
             \Log::warning('[FSM] Context filtering failed: could not reinstantiate DTO, returning original', [

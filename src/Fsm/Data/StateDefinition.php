@@ -70,8 +70,8 @@ class StateDefinition extends Dto
 
     /**
      * @param  FsmStateEnum|string  $name  The state name or enum value.
-     * @param  array<int, TransitionCallback>|\Illuminate\Support\Collection<int, TransitionCallback>  $onEntryCallbacks  Callbacks executed when entering this state.
-     * @param  array<int, TransitionCallback>|\Illuminate\Support\Collection<int, TransitionCallback>  $onExitCallbacks  Callbacks executed when exiting this state.
+     * @param  array<int, TransitionCallback>|Collection<int, TransitionCallback>  $onEntryCallbacks  Callbacks executed when entering this state.
+     * @param  array<int, TransitionCallback>|Collection<int, TransitionCallback>  $onExitCallbacks  Callbacks executed when exiting this state.
      * @param  string|null  $description  Human-readable description of the state.
      * @param  string  $type  The type of state (initial, intermediate, final, error).
      * @param  string|null  $category  The category this state belongs to.
@@ -99,8 +99,8 @@ class StateDefinition extends Dto
 
     /**
      * @param  array<string, mixed>|FsmStateEnum|string  $name
-     * @param  array<int, TransitionCallback>|\Illuminate\Support\Collection<int, TransitionCallback>  $onEntryCallbacks
-     * @param  array<int, TransitionCallback>|\Illuminate\Support\Collection<int, TransitionCallback>  $onExitCallbacks
+     * @param  array<int, TransitionCallback>|Collection<int, TransitionCallback>  $onEntryCallbacks
+     * @param  array<int, TransitionCallback>|Collection<int, TransitionCallback>  $onExitCallbacks
      * @param  array<string, mixed>  $metadata
      */
     public function __construct(

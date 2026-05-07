@@ -5,6 +5,7 @@ namespace Tests;
 use Fsm\FsmServiceProvider;
 use Glhd\Bits\Support\BitsServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
+use Thunk\Verbs\VerbsServiceProvider;
 
 abstract class TestbenchTestCase extends BaseTestCase
 {
@@ -13,7 +14,7 @@ abstract class TestbenchTestCase extends BaseTestCase
         return [
             BitsServiceProvider::class,
             FsmServiceProvider::class,
-            \Thunk\Verbs\VerbsServiceProvider::class,
+            VerbsServiceProvider::class,
         ];
     }
 

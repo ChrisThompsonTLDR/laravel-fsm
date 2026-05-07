@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Fsm\Data;
 
 use Fsm\Data\TransitionDefinition;
+use Illuminate\Support\Collection;
 use PHPUnit\Framework\TestCase;
 use Tests\Feature\Fsm\Enums\TestFeatureState;
 
@@ -162,9 +163,9 @@ class TransitionDefinitionTest extends TestCase
             toState: TestFeatureState::Active
         );
 
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->guards);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->actions);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->onTransitionCallbacks);
+        $this->assertInstanceOf(Collection::class, $transition->guards);
+        $this->assertInstanceOf(Collection::class, $transition->actions);
+        $this->assertInstanceOf(Collection::class, $transition->onTransitionCallbacks);
         $this->assertCount(0, $transition->guards);
         $this->assertCount(0, $transition->actions);
         $this->assertCount(0, $transition->onTransitionCallbacks);
@@ -284,9 +285,9 @@ class TransitionDefinitionTest extends TestCase
             'onTransitionCallbacks' => ['callback1', 'callback2'], // These should be cast to Collection
         ]);
 
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->guards);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->actions);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->onTransitionCallbacks);
+        $this->assertInstanceOf(Collection::class, $transition->guards);
+        $this->assertInstanceOf(Collection::class, $transition->actions);
+        $this->assertInstanceOf(Collection::class, $transition->onTransitionCallbacks);
 
         // Verify the collections contain the expected items
         $this->assertCount(2, $transition->guards);
@@ -302,9 +303,9 @@ class TransitionDefinitionTest extends TestCase
             'toState' => TestFeatureState::Active,
         ]);
 
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->guards);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->actions);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->onTransitionCallbacks);
+        $this->assertInstanceOf(Collection::class, $transition->guards);
+        $this->assertInstanceOf(Collection::class, $transition->actions);
+        $this->assertInstanceOf(Collection::class, $transition->onTransitionCallbacks);
 
         $this->assertCount(0, $transition->guards);
         $this->assertCount(0, $transition->actions);

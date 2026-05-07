@@ -7,6 +7,7 @@ use Fsm\Listeners\PersistStateTransitionedEvent;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use YorCreative\LaravelArgonautDTO\ArgonautDTOContract;
 
 uses(RefreshDatabase::class);
 
@@ -130,7 +131,7 @@ it('handles database exceptions gracefully', function () {
 });
 
 it('handles model with context data', function () {
-    $context = $this->createMock(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class);
+    $context = $this->createMock(ArgonautDTOContract::class);
     $context->expects($this->once())
         ->method('toArray')
         ->willReturn(['user_id' => 123, 'reason' => 'test']);

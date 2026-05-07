@@ -6,6 +6,7 @@ namespace Tests\Feature\TrafficLight;
 
 use Fsm\Events\TransitionFailed;
 use Fsm\Events\TransitionSucceeded;
+use Fsm\Exceptions\FsmTransitionFailedException;
 use Fsm\FsmRegistry;
 use Fsm\Models\FsmLog;
 use Illuminate\Support\Facades\Event;
@@ -111,7 +112,7 @@ class TrafficLightIntegrationTest extends BehavioralTestCase
             $light->transitionFsm('state', TrafficLightState::Red);
             $this->fail('Expected invalid transition to throw.');
         } catch (\Throwable $exception) {
-            $this->assertInstanceOf(\Fsm\Exceptions\FsmTransitionFailedException::class, $exception);
+            $this->assertInstanceOf(FsmTransitionFailedException::class, $exception);
             $this->assertSame(TrafficLightState::Green, $light->fresh()->state);
             Event::assertDispatched(TransitionFailed::class);
         }

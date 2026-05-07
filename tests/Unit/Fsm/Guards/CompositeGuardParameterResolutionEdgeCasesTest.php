@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Fsm\Data\TransitionInput;
 use Fsm\Guards\CompositeGuard;
+use Illuminate\Database\Eloquent\Model;
 use Tests\TestCase;
 
 /**
@@ -49,7 +50,7 @@ class CompositeGuardParameterResolutionEdgeCasesTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -95,7 +96,7 @@ class CompositeGuardParameterResolutionEdgeCasesTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -144,7 +145,7 @@ class CompositeGuardParameterResolutionEdgeCasesTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -191,7 +192,7 @@ class CompositeGuardParameterResolutionEdgeCasesTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -239,7 +240,7 @@ class CompositeGuardParameterResolutionEdgeCasesTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -289,7 +290,7 @@ class CompositeGuardParameterResolutionEdgeCasesTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -298,7 +299,7 @@ class CompositeGuardParameterResolutionEdgeCasesTest extends TestCase
             'param1' => 'hello',
             'param2' => 42,
             'param3' => ['nested', 'array'],
-            'param4' => new \stdClass,
+            'param4' => new stdClass,
             // param5 should use default
         ];
 
@@ -309,7 +310,7 @@ class CompositeGuardParameterResolutionEdgeCasesTest extends TestCase
         $this->assertSame('hello', $guardSpy->receivedParams[0]);
         $this->assertSame(42, $guardSpy->receivedParams[1]);
         $this->assertSame(['nested', 'array'], $guardSpy->receivedParams[2]);
-        $this->assertInstanceOf(\stdClass::class, $guardSpy->receivedParams[3]);
+        $this->assertInstanceOf(stdClass::class, $guardSpy->receivedParams[3]);
         $this->assertTrue($guardSpy->receivedParams[4]);
         $this->assertTrue($result);
     }
@@ -328,7 +329,7 @@ class CompositeGuardParameterResolutionEdgeCasesTest extends TestCase
 
             public function guardMethod(
                 callable $param1,
-                \Closure $param2,
+                Closure $param2,
                 ?callable $param3 = null
             ): bool {
                 $this->called = true;
@@ -341,7 +342,7 @@ class CompositeGuardParameterResolutionEdgeCasesTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -389,7 +390,7 @@ class CompositeGuardParameterResolutionEdgeCasesTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -436,7 +437,7 @@ class CompositeGuardParameterResolutionEdgeCasesTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -479,7 +480,7 @@ class CompositeGuardParameterResolutionEdgeCasesTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -510,7 +511,7 @@ class CompositeGuardParameterResolutionEdgeCasesTest extends TestCase
 
     private function createTransitionInput(): TransitionInput
     {
-        $model = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $model = Mockery::mock(Model::class);
         $model->shouldReceive('getForeignKey')->andReturn('test_id');
 
         return new TransitionInput(

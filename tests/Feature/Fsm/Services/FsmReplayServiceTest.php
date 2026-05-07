@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Fsm\Services;
 
+use Fsm\Data\Dto;
 use Fsm\Models\FsmEventLog;
+use Fsm\Services\FsmEngineService;
 use Fsm\Services\FsmReplayService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Fsm\Models\TestModel;
 use Tests\FsmTestCase;
+use YorCreative\LaravelArgonautDTO\ArgonautDTOContract;
 
 class FsmReplayServiceTest extends FsmTestCase
 {
@@ -647,7 +650,7 @@ class FsmReplayServiceTest extends FsmTestCase
     public function test_identical_vs_not_identical_mutations(): void
     {
         // Create a DTO with from() method that has 2 parameters instead of 1
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends Dto
         {
             public string $message;
 
@@ -681,12 +684,12 @@ class FsmReplayServiceTest extends FsmTestCase
         // Mock config to exclude 'secret' property
         config(['fsm.logging.excluded_context_properties' => ['secret']]);
 
-        $service = $this->app->make(\Fsm\Services\FsmEngineService::class);
+        $service = $this->app->make(FsmEngineService::class);
 
         $filtered = $service->filterContextForLogging($testDto);
 
         // Test that the context filtering logic works (may fall back or succeed depending on implementation)
         $this->assertNotNull($filtered);
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
     }
 }

@@ -14,6 +14,8 @@ use Fsm\Data\TransitionAction;
 use Fsm\Data\TransitionCallback;
 use Fsm\Data\TransitionDefinition;
 use Fsm\Data\TransitionGuard;
+use Fsm\Guards\PolicyGuard;
+use Illuminate\Support\Facades\App;
 use LogicException;
 
 /**
@@ -587,7 +589,7 @@ class TransitionBuilder
         $description = $description ?? "Policy check: {$ability}";
 
         $this->fluentGuards[] = new TransitionGuard(
-            callable: fn ($input) => app(\Fsm\Guards\PolicyGuard::class)->check($input, $ability, null, $parameters),
+            callable: fn ($input) => app(PolicyGuard::class)->check($input, $ability, null, $parameters),
             parameters: ['ability' => $ability, ...$parameters],
             description: $description
         );
@@ -610,7 +612,7 @@ class TransitionBuilder
         $description = $description ?? 'Policy check: can transition';
 
         $this->fluentGuards[] = new TransitionGuard(
-            callable: fn ($input) => app(\Fsm\Guards\PolicyGuard::class)->canTransition($input, null, $parameters),
+            callable: fn ($input) => app(PolicyGuard::class)->canTransition($input, null, $parameters),
             parameters: $parameters,
             description: $description
         );
@@ -952,13 +954,13 @@ class TransitionBuilder
         // definition with the FsmRegistry so it is immediately available to
         // services like FsmEngineService without requiring discovery.
         try {
-            /** @var \Fsm\FsmRegistry|null $registry */
-            $registry = \Illuminate\Support\Facades\App::make(\Fsm\FsmRegistry::class);
+            /** @var FsmRegistry|null $registry */
+            $registry = App::make(FsmRegistry::class);
         } catch (\Throwable) {
             $registry = null; // Outside of a Laravel container – just ignore.
         }
 
-        if ($registry instanceof \Fsm\FsmRegistry) {
+        if ($registry instanceof FsmRegistry) {
             $registry->registerDefinition($this->modelClass, $this->columnName, $runtimeDefinition);
         }
 

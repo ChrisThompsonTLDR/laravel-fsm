@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Fsm\Guards;
 
+use Fsm\Contracts\FsmStateEnum;
 use Fsm\Data\TransitionInput;
 use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -76,7 +77,7 @@ class PolicyGuard
         ?Authenticatable $user = null,
         array $parameters = []
     ): bool {
-        $fromStateValue = $input->fromState instanceof \Fsm\Contracts\FsmStateEnum
+        $fromStateValue = $input->fromState instanceof FsmStateEnum
             ? $input->fromState->value
             : (string) $input->fromState;
 
@@ -97,7 +98,7 @@ class PolicyGuard
         ?Authenticatable $user = null,
         array $parameters = []
     ): bool {
-        $toStateValue = $input->toState instanceof \Fsm\Contracts\FsmStateEnum
+        $toStateValue = $input->toState instanceof FsmStateEnum
             ? $input->toState->value
             : (string) $input->toState;
 

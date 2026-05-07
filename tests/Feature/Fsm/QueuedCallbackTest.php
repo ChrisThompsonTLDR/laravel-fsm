@@ -8,6 +8,7 @@ use Fsm\FsmBuilder;
 use Fsm\Jobs\RunCallbackJob;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
+use Tests\Feature\Fsm\Callbacks\TestCallback;
 use Tests\Feature\Fsm\Data\TestContextData;
 use Tests\Feature\Fsm\Enums\TestFeatureState;
 use Tests\Feature\Fsm\Models\TestModel;
@@ -23,7 +24,7 @@ class QueuedCallbackTest extends FsmTestCase
         FsmBuilder::for(TestModel::class, 'status')
             ->initialState(TestFeatureState::Idle)
             ->state(TestFeatureState::Pending, function ($builder) {
-                $builder->onEntry([\Tests\Feature\Fsm\Callbacks\TestCallback::class, 'handle'], [], false, true);
+                $builder->onEntry([TestCallback::class, 'handle'], [], false, true);
             })
             ->from(TestFeatureState::Idle)->to(TestFeatureState::Pending)
             ->build();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Fsm\Services;
 
+use Fsm\Data\Dto;
 use Fsm\FsmRegistry;
 use Fsm\Services\FsmEngineService;
 use Fsm\Services\FsmLogger;
@@ -17,6 +18,7 @@ use ReflectionIntersectionType;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionUnionType;
+use YorCreative\LaravelArgonautDTO\ArgonautDTOContract;
 
 /**
  * Test for FsmEngineService parameter validation and context filtering edge cases.
@@ -163,7 +165,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class with from() method that has 0 parameters
-        $contextClass = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class implements ArgonautDTOContract
         {
             public static function from(): self
             {
@@ -197,7 +199,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class with from() method that has 2 parameters
-        $contextClass = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class implements ArgonautDTOContract
         {
             public static function from($param1, $param2): self
             {
@@ -231,7 +233,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class with from() method that has string parameter
-        $contextClass = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -265,7 +267,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class with from() method that has array parameter
-        $contextClass = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class implements ArgonautDTOContract
         {
             public static function from(array $data): self
             {
@@ -299,7 +301,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class with constructor that throws exception
-        $contextClass = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class implements ArgonautDTOContract
         {
             public function __construct()
             {
@@ -333,7 +335,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class with non-static from() method
-        $contextClass = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -367,7 +369,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class with private from() method
-        $contextClass = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -401,7 +403,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class without from() method
-        $contextClass = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class implements ArgonautDTOContract
         {
             public function toArray(): array
             {
@@ -540,7 +542,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class that is NOT a subclass of Dto
-        $contextClass = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class implements ArgonautDTOContract
         {
             public function toArray(): array
             {
@@ -569,7 +571,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class that extends Dto but has no from() method
-        $contextClass = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class([]) extends Dto implements ArgonautDTOContract
         {
             public function toArray(int $depth = 3): array
             {
@@ -660,7 +662,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class that extends Dto with from() method but wrong parameter count
-        $contextClass = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -694,7 +696,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class that extends Dto with non-static from() method
-        $contextClass = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -728,7 +730,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class that extends Dto with private static from() method
-        $contextClass = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -762,7 +764,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class that extends Dto with from() method that doesn't accept array
-        $contextClass = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -796,7 +798,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class that is NOT a Dto subclass with from() method but wrong parameter count
-        $contextClass = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -830,7 +832,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Create a mock context class that is NOT a Dto subclass with from() method that doesn't accept array
-        $contextClass = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -1036,7 +1038,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Test with OR instead of AND for reflection method checks
-        $contextClass = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -1070,7 +1072,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Test with NOT identical parameter count check
-        $contextClass = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -1104,7 +1106,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Test with decremented parameter count (0 instead of 1)
-        $contextClass = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -1129,7 +1131,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $this->assertSame($context, $result);
 
         // Test with incremented parameter count (2 instead of 1)
-        $contextClass2 = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass2 = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload, string $extra = ''): static
             {
@@ -1201,7 +1203,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Test with decremented parameter count (0 instead of 1)
-        $contextClass = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -1226,7 +1228,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $this->assertSame($context, $result);
 
         // Test with incremented parameter count (2 instead of 1)
-        $contextClass2 = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass2 = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload, string $extra = ''): static
             {
@@ -1260,7 +1262,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Test with negated parameterAcceptsArray check
-        $contextClass = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -1294,7 +1296,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Test with removed early return for parameterAcceptsArray check
-        $contextClass = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -1328,7 +1330,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $reflection->setAccessible(true);
 
         // Test with removed 'context_class' from logging array
-        $contextClass = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -1353,7 +1355,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $this->assertSame($context, $result);
 
         // Test with removed 'is_dto' from logging array
-        $contextClass2 = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass2 = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -1378,7 +1380,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $this->assertSame($context2, $result2);
 
         // Test with removed 'has_from_method' from logging array
-        $contextClass3 = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass3 = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {
@@ -1403,7 +1405,7 @@ class FsmEngineServiceParameterValidationTest extends TestCase
         $this->assertSame($context3, $result3);
 
         // Test with removed 'error' from logging array
-        $contextClass4 = new class([]) extends \Fsm\Data\Dto implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $contextClass4 = new class([]) extends Dto implements ArgonautDTOContract
         {
             public static function from(mixed $payload): static
             {

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Fsm\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * FSM Event Log model for storing state transition events.
@@ -22,10 +24,10 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string|null $from_state
  * @property string $to_state
  * @property string|null $transition_name
- * @property \Illuminate\Support\Carbon|null $occurred_at
+ * @property Carbon|null $occurred_at
  * @property array<string, mixed>|null $context
  * @property array<string, mixed>|null $metadata
- * @property \Illuminate\Support\Carbon $created_at
+ * @property Carbon $created_at
  * @property-read Model $model
  */
 class FsmEventLog extends Model
@@ -60,7 +62,7 @@ class FsmEventLog extends Model
     /**
      * The model that transitioned.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\MorphTo<\Illuminate\Database\Eloquent\Model, $this>
+     * @return MorphTo<Model, $this>
      */
     public function model(): MorphTo
     {
@@ -89,9 +91,9 @@ class FsmEventLog extends Model
      *
      * @param  class-string<Model>  $modelClass
      *
-     * @phpstan-return \Illuminate\Database\Eloquent\Builder<static>
+     * @phpstan-return Builder<static>
      */
-    public static function forModel(string $modelClass, string $modelId, string $columnName): \Illuminate\Database\Eloquent\Builder
+    public static function forModel(string $modelClass, string $modelId, string $columnName): Builder
     {
         return static::query()
             ->where('model_type', $modelClass)

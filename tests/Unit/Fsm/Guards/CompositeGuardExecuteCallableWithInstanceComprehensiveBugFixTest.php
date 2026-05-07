@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Fsm\Data\TransitionGuard;
 use Fsm\Data\TransitionInput;
 use Fsm\Guards\CompositeGuard;
+use Illuminate\Database\Eloquent\Model;
 use Tests\TestCase;
 
 /**
@@ -39,14 +40,14 @@ class CompositeGuardExecuteCallableWithInstanceComprehensiveBugFixTest extends T
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
         $parameters = ['param1' => 'hello'];
 
         // This should now throw an InvalidArgumentException with the correct message
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Cannot access private method 'privateMethod' on class");
 
         $method->invoke($composite, [$guardSpy, 'privateMethod'], $parameters);
@@ -69,14 +70,14 @@ class CompositeGuardExecuteCallableWithInstanceComprehensiveBugFixTest extends T
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
         $parameters = ['param1' => 'hello'];
 
         // This should now throw an InvalidArgumentException with the correct message
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Cannot access protected method 'protectedMethod' on class");
 
         $method->invoke($composite, [$guardSpy, 'protectedMethod'], $parameters);
@@ -99,14 +100,14 @@ class CompositeGuardExecuteCallableWithInstanceComprehensiveBugFixTest extends T
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
         $parameters = ['param1' => 'hello'];
 
         // This should throw an InvalidArgumentException with the reflection error message
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Failed to create reflection for method 'nonExistentMethod' on class");
 
         $method->invoke($composite, [$guardSpy, 'nonExistentMethod'], $parameters);
@@ -136,7 +137,7 @@ class CompositeGuardExecuteCallableWithInstanceComprehensiveBugFixTest extends T
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -181,7 +182,7 @@ class CompositeGuardExecuteCallableWithInstanceComprehensiveBugFixTest extends T
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -226,7 +227,7 @@ class CompositeGuardExecuteCallableWithInstanceComprehensiveBugFixTest extends T
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -270,7 +271,7 @@ class CompositeGuardExecuteCallableWithInstanceComprehensiveBugFixTest extends T
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -281,7 +282,7 @@ class CompositeGuardExecuteCallableWithInstanceComprehensiveBugFixTest extends T
         ];
 
         // This should throw an ArgumentCountError
-        $this->expectException(\ArgumentCountError::class);
+        $this->expectException(ArgumentCountError::class);
 
         $method->invoke($composite, [$guardSpy, 'guardMethod'], $parameters);
     }
@@ -310,7 +311,7 @@ class CompositeGuardExecuteCallableWithInstanceComprehensiveBugFixTest extends T
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -354,7 +355,7 @@ class CompositeGuardExecuteCallableWithInstanceComprehensiveBugFixTest extends T
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -436,11 +437,11 @@ class CompositeGuardExecuteCallableWithInstanceComprehensiveBugFixTest extends T
         };
 
         $composite = CompositeGuard::create([]);
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Failed to create reflection for method 'nonExistentMethod' on class");
 
         $method->invoke($composite, [$guardSpy1, 'nonExistentMethod'], ['param1' => 'hello']);
@@ -454,7 +455,7 @@ class CompositeGuardExecuteCallableWithInstanceComprehensiveBugFixTest extends T
             }
         };
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Cannot access private method 'privateMethod' on class");
 
         $method->invoke($composite, [$guardSpy2, 'privateMethod'], ['param1' => 'hello']);
@@ -462,7 +463,7 @@ class CompositeGuardExecuteCallableWithInstanceComprehensiveBugFixTest extends T
 
     private function createTransitionInput(): TransitionInput
     {
-        $model = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $model = Mockery::mock(Model::class);
         $model->shouldReceive('getForeignKey')->andReturn('test_id');
 
         return new TransitionInput(

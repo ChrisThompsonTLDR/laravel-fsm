@@ -7,6 +7,8 @@ namespace Tests\Feature\Fsm;
 use Fsm\Contracts\FsmStateEnum;
 use Fsm\FsmBuilder;
 use Fsm\FsmRegistry;
+use Fsm\Services\BootstrapDetector;
+use Illuminate\Contracts\Config\Repository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Feature\Fsm\Enums\TestFeatureState;
 use Tests\Feature\Fsm\Enums\WorkflowState;
@@ -39,8 +41,8 @@ class EnumConversionRegressionTest extends FsmTestCase
         // Create a fresh FsmRegistry instance
         $this->app->singleton(FsmRegistry::class, function ($app) {
             return new FsmRegistry(
-                $app->make(\Fsm\Services\BootstrapDetector::class),
-                $app->make(\Illuminate\Contracts\Config\Repository::class)
+                $app->make(BootstrapDetector::class),
+                $app->make(Repository::class)
             );
         });
     }

@@ -6,6 +6,7 @@ namespace Tests\Feature\Fsm\Http\Controllers;
 
 use Fsm\Http\Controllers\FsmReplayApiController;
 use Fsm\Services\FsmReplayService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -35,7 +36,7 @@ class FsmReplayApiControllerComprehensiveTest extends TestCase
         ]);
 
         // Mock the service to return an empty collection
-        $historyMock = new \Illuminate\Database\Eloquent\Collection([]);
+        $historyMock = new Collection([]);
         $this->replayService->method('getTransitionHistory')->willReturn($historyMock);
 
         $response = $this->controller->getHistory($request);
@@ -179,7 +180,7 @@ class FsmReplayApiControllerComprehensiveTest extends TestCase
             'to_state' => 'green',
         ]);
 
-        $historyMock = new \Illuminate\Database\Eloquent\Collection([]);
+        $historyMock = new Collection([]);
         $this->replayService->method('getTransitionHistory')->willReturn($historyMock);
 
         $response = $this->controller->getHistory($request);
@@ -215,7 +216,7 @@ class FsmReplayApiControllerComprehensiveTest extends TestCase
             'column_name' => 'workflow_status',
         ]);
 
-        $historyMock = new \Illuminate\Database\Eloquent\Collection([]);
+        $historyMock = new Collection([]);
         $this->replayService->method('getTransitionHistory')->willReturn($historyMock);
 
         $response = $this->controller->getHistory($request);
@@ -232,7 +233,7 @@ class FsmReplayApiControllerComprehensiveTest extends TestCase
             'column_name' => 'status',
         ]);
 
-        $historyMock = new \Illuminate\Database\Eloquent\Collection([]);
+        $historyMock = new Collection([]);
         $this->replayService->method('getTransitionHistory')->willReturn($historyMock);
 
         $response = $this->controller->getHistory($request);
