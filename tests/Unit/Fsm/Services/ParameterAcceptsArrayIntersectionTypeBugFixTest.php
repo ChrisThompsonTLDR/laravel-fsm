@@ -69,7 +69,7 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
+        $reflectionMethod = new ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -103,7 +103,7 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
+        $reflectionMethod = new ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -136,7 +136,7 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
+        $reflectionMethod = new ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -169,7 +169,7 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
+        $reflectionMethod = new ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -198,7 +198,7 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
+        $reflectionMethod = new ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -224,7 +224,7 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
+        $reflectionMethod = new ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -250,7 +250,7 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
+        $reflectionMethod = new ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -276,7 +276,7 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
+        $reflectionMethod = new ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -317,7 +317,7 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
+        $reflectionMethod = new ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -343,7 +343,7 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
+        $reflectionMethod = new ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -374,7 +374,7 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
+        $reflectionMethod = new ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 
@@ -408,7 +408,7 @@ class ParameterAcceptsArrayIntersectionTypeBugFixTest extends TestCase
             }
         };
 
-        $reflectionMethod = new \ReflectionMethod($testClass, 'test_method');
+        $reflectionMethod = new ReflectionMethod($testClass, 'test_method');
         $parameters = $reflectionMethod->getParameters();
         $paramType = $parameters[0]->getType();
 

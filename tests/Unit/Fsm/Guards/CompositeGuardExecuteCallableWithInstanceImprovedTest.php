@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Fsm\Data\TransitionGuard;
 use Fsm\Data\TransitionInput;
 use Fsm\Guards\CompositeGuard;
+use Illuminate\Database\Eloquent\Model;
 use Tests\TestCase;
 
 /**
@@ -45,7 +46,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -90,7 +91,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -135,7 +136,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -180,7 +181,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -220,7 +221,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -230,7 +231,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
             // param2 is missing
         ];
 
-        $this->expectException(\ArgumentCountError::class);
+        $this->expectException(ArgumentCountError::class);
 
         $method->invoke($composite, [$guardSpy, 'guardMethod'], $parameters);
     }
@@ -256,7 +257,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -266,7 +267,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
             // param2 is missing
         ];
 
-        $this->expectException(\ArgumentCountError::class);
+        $this->expectException(ArgumentCountError::class);
 
         $method->invoke($composite, [$guardSpy, 'guardMethod'], $parameters);
     }
@@ -295,7 +296,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -335,7 +336,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -380,7 +381,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -424,7 +425,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -467,7 +468,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -475,7 +476,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
         $parameters = [
             'param1' => 'hello',
             'param2' => ['nested', 'array'],
-            'param3' => new \stdClass,
+            'param3' => new stdClass,
         ];
 
         $result = $method->invoke($composite, [$guardSpy, 'guardMethod'], $parameters);
@@ -484,7 +485,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
         $this->assertTrue($guardSpy->called);
         $this->assertSame('hello', $guardSpy->receivedParams[0]);
         $this->assertSame(['nested', 'array'], $guardSpy->receivedParams[1]);
-        $this->assertInstanceOf(\stdClass::class, $guardSpy->receivedParams[2]);
+        $this->assertInstanceOf(stdClass::class, $guardSpy->receivedParams[2]);
         $this->assertTrue($result);
     }
 
@@ -558,7 +559,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -582,7 +583,7 @@ class CompositeGuardExecuteCallableWithInstanceImprovedTest extends TestCase
 
     private function createTransitionInput(): TransitionInput
     {
-        $model = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $model = Mockery::mock(Model::class);
         $model->shouldReceive('getForeignKey')->andReturn('test_id');
 
         return new TransitionInput(

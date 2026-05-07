@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Fsm\Data;
 
+use Fsm\Data\Dto;
 use Fsm\Data\TransitionInput;
 use Illuminate\Database\Eloquent\Model;
 use Orchestra\Testbench\TestCase;
@@ -272,7 +273,7 @@ class TransitionInputErrorLoggingBugFixTest extends TestCase
         $model = $this->createMock(Model::class);
 
         // Create a test DTO that extends Dto
-        $testDtoClass = new class(['message' => 'test']) extends \Fsm\Data\Dto
+        $testDtoClass = new class(['message' => 'test']) extends Dto
         {
             public string $message;
 

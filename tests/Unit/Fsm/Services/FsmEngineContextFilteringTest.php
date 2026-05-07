@@ -14,6 +14,7 @@ use Fsm\Services\FsmEngineService;
 use Fsm\Services\FsmLogger;
 use Fsm\Services\FsmMetricsService;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
@@ -280,7 +281,7 @@ class FsmEngineContextFilteringTest extends TestCase
         $config->shouldReceive('get')->with('fsm.logging.excluded_context_properties', [])->andReturn($excludedProperties);
         $config->shouldReceive('get')->with('fsm.debug', false)->andReturn(false);
 
-        $dispatcher = Mockery::mock(\Illuminate\Contracts\Events\Dispatcher::class);
+        $dispatcher = Mockery::mock(Dispatcher::class);
         $dispatcher->shouldReceive('dispatch')->andReturn(null);
         $metrics = new FsmMetricsService($dispatcher);
 
@@ -297,7 +298,7 @@ class FsmEngineContextFilteringTest extends TestCase
         $context = new FilterContextWithDto('test message', 'secret', 5);
 
         // Use reflection to call the protected method
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('filterContextForLogging');
         $method->setAccessible(true);
 
@@ -329,7 +330,7 @@ class FsmEngineContextFilteringTest extends TestCase
             'count' => 10,
         ]);
 
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('filterContextForLogging');
         $method->setAccessible(true);
 
@@ -356,7 +357,7 @@ class FsmEngineContextFilteringTest extends TestCase
             'count' => 15,
         ]);
 
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('filterContextForLogging');
         $method->setAccessible(true);
 
@@ -380,7 +381,7 @@ class FsmEngineContextFilteringTest extends TestCase
 
         $context = new FilterContextWithDto('original', 'data', 20);
 
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('filterContextForLogging');
         $method->setAccessible(true);
 
@@ -398,7 +399,7 @@ class FsmEngineContextFilteringTest extends TestCase
 
         $service = $this->makeService(['sensitiveData']);
 
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('filterContextForLogging');
         $method->setAccessible(true);
 
@@ -416,7 +417,7 @@ class FsmEngineContextFilteringTest extends TestCase
         $service = $this->makeService(['nonExistentProperty']);
         $context = new FilterContextWithDto('message', 'data', 25);
 
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('filterContextForLogging');
         $method->setAccessible(true);
 
@@ -432,7 +433,7 @@ class FsmEngineContextFilteringTest extends TestCase
     {
         // Create a DTO class that implements ArgonautDTOContract directly (not extending Dto)
         // and fails when constructed with an array
-        $failingDtoClass = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $failingDtoClass = new class implements ArgonautDTOContract
         {
             public string $message;
 
@@ -474,7 +475,7 @@ class FsmEngineContextFilteringTest extends TestCase
         // Verify that a warning was logged
         Log::shouldHaveReceived('warning')
             ->once()
-            ->with('[FSM] Context filtering failed: could not reinstantiate DTO, returning original', \Mockery::type('array'));
+            ->with('[FSM] Context filtering failed: could not reinstantiate DTO, returning original', Mockery::type('array'));
     }
 
     public function test_filter_context_handles_non_static_from_method(): void
@@ -490,7 +491,7 @@ class FsmEngineContextFilteringTest extends TestCase
             'count' => 42,
         ]);
 
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('filterContextForLogging');
         $method->setAccessible(true);
 
@@ -523,7 +524,7 @@ class FsmEngineContextFilteringTest extends TestCase
             'count' => 99,
         ]);
 
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('filterContextForLogging');
         $method->setAccessible(true);
 
@@ -552,7 +553,7 @@ class FsmEngineContextFilteringTest extends TestCase
         $context = new FilterContextWithDto('integration test', 'should not be logged', 30);
 
         // Use reflection to call the filterContextForLogging method
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('filterContextForLogging');
         $method->setAccessible(true);
 

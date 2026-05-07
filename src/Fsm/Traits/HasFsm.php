@@ -7,6 +7,7 @@ namespace Fsm\Traits;
 use Fsm\Constants;
 use Fsm\Contracts\FsmEventEnum;
 use Fsm\Contracts\FsmStateEnum;
+use Fsm\Exceptions\FsmTransitionFailedException;
 use Fsm\FsmRegistry;
 use Fsm\Services\FsmEngineService;
 use Illuminate\Database\Eloquent\Model;
@@ -183,7 +184,7 @@ trait HasFsm
      * @param  ArgonautDTOContract|null  $context  Optional context DTO for guards, callbacks, and actions.
      * @return static The model instance.
      *
-     * @throws \Fsm\Exceptions\FsmTransitionFailedException If the transition fails.
+     * @throws FsmTransitionFailedException If the transition fails.
      */
     public function transitionFsm(?string $columnName, FsmStateEnum|string $toState, ?ArgonautDTOContract $context = null): static
     {

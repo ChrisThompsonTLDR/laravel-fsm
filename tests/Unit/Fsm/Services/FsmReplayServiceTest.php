@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\TestCase;
 
-mutates(\Fsm\Services\FsmReplayService::class);
+mutates(FsmReplayService::class);
 
 /**
  * Test for FsmReplayService functionality.

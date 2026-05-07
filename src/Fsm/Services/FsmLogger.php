@@ -53,7 +53,7 @@ class FsmLogger
                     return (string) $id;
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // ignore reflection errors
         }
 
@@ -122,7 +122,7 @@ class FsmLogger
 
         try {
             $contextArray = $context->toArray();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $contextArray = get_object_vars($context);
         }
 

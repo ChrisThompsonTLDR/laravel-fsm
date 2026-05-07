@@ -8,6 +8,7 @@ use Fsm\Traits\HasFsm;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Tests\Feature\TrafficLight\Database\Factories\TrafficLightFactory;
+use Tests\Feature\TrafficLight\Enums\TrafficLightState;
 
 class TrafficLight extends Model
 {
@@ -17,7 +18,7 @@ class TrafficLight extends Model
     protected $fillable = ['name', 'state'];
 
     protected $casts = [
-        'state' => \Tests\Feature\TrafficLight\Enums\TrafficLightState::class,
+        'state' => TrafficLightState::class,
     ];
 
     protected static function newFactory()

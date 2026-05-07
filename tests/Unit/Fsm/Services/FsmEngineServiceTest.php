@@ -5,19 +5,30 @@ declare(strict_types=1);
 namespace Tests\Unit\Fsm\Services;
 
 use Closure;
+use Fsm\Constants;
 use Fsm\Contracts\FsmStateEnum;
+use Fsm\Data\Dto;
 use Fsm\Data\FsmRuntimeDefinition;
 use Fsm\Data\StateDefinition;
 use Fsm\Data\TransitionAction;
+use Fsm\Data\TransitionCallback;
 use Fsm\Data\TransitionDefinition;
 use Fsm\Data\TransitionGuard;
+use Fsm\Data\TransitionInput;
+use Fsm\Events\TransitionAttempted;
 use Fsm\Exceptions\FsmTransitionFailedException;
 use Fsm\FsmRegistry;
+use Fsm\Jobs\RunActionJob;
+use Fsm\Jobs\RunCallbackJob;
 use Fsm\Services\FsmEngineService;
 use Fsm\Services\FsmLogger;
+use Fsm\Services\FsmMetricsService;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
 use Mockery;
 use Orchestra\Testbench\TestCase;
@@ -27,8 +38,9 @@ use RuntimeException;
 use Tests\Feature\Fsm\Data\FailingContextDto;
 use Tests\Feature\Fsm\Data\TestContextData;
 use Tests\Feature\Fsm\Data\TestContextDto;
+use YorCreative\LaravelArgonautDTO\ArgonautDTOContract;
 
-mutates(\Fsm\Services\FsmEngineService::class);
+mutates(FsmEngineService::class);
 
 enum EngineState: string implements FsmStateEnum
 {
@@ -119,9 +131,9 @@ class FsmEngineServiceTest extends TestCase
         $config->shouldReceive('get')->with('fsm.logging.excluded_context_properties', [])->andReturn([]);
         $config->shouldReceive('get')->with('fsm.debug', false)->andReturn(false);
 
-        $dispatcher = Mockery::mock(\Illuminate\Contracts\Events\Dispatcher::class);
+        $dispatcher = Mockery::mock(Dispatcher::class);
         $dispatcher->shouldReceive('dispatch')->andReturn(null);
-        $metrics = new \Fsm\Services\FsmMetricsService($dispatcher);
+        $metrics = new FsmMetricsService($dispatcher);
 
         return new FsmEngineService($registry, $logger, $metrics, $db, $config);
     }
@@ -353,7 +365,7 @@ class FsmEngineServiceTest extends TestCase
         $service = $this->makeService($definition);
 
         // Test DTO with from() method that accepts single array parameter
-        $dtoWithSingleParam = new class(['test' => 'data']) extends \Fsm\Data\Dto
+        $dtoWithSingleParam = new class(['test' => 'data']) extends Dto
         {
             public function __construct(public array $data) {}
 
@@ -380,7 +392,7 @@ class FsmEngineServiceTest extends TestCase
         $service = $this->makeService($definition);
 
         // Test DTO with from() method that accepts no parameters (should fail)
-        $dtoWithNoParams = new class(['test' => 'data']) extends \Fsm\Data\Dto
+        $dtoWithNoParams = new class(['test' => 'data']) extends Dto
         {
             public static function from(mixed $payload): static
             {
@@ -405,7 +417,7 @@ class FsmEngineServiceTest extends TestCase
         $service = $this->makeService($definition);
 
         // Test DTO with from() method that accepts multiple parameters (should fail)
-        $dtoWithMultipleParams = new class(['test' => 'data']) extends \Fsm\Data\Dto
+        $dtoWithMultipleParams = new class(['test' => 'data']) extends Dto
         {
             public static function from(mixed $payload): static
             {
@@ -430,7 +442,7 @@ class FsmEngineServiceTest extends TestCase
         $service = $this->makeService($definition);
 
         // Test non-DTO class with from() method
-        $nonDtoWithFrom = new class(['test' => 'data']) implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $nonDtoWithFrom = new class(['test' => 'data']) implements ArgonautDTOContract
         {
             public function __construct(public array $data) {}
 
@@ -467,7 +479,7 @@ class FsmEngineServiceTest extends TestCase
         $service = $this->makeService($definition);
 
         // Test class without from() method (should use constructor fallback)
-        $noFromMethod = new class(['test' => 'data']) implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $noFromMethod = new class(['test' => 'data']) implements ArgonautDTOContract
         {
             public function __construct(public array $data) {}
 
@@ -499,7 +511,7 @@ class FsmEngineServiceTest extends TestCase
         $service = $this->makeService($definition);
 
         // Test class that can't be constructed with array (should return original)
-        $badConstructor = new class('test_string') implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $badConstructor = new class('test_string') implements ArgonautDTOContract
         {
             public function __construct(public string $notArray) {}
 
@@ -923,9 +935,9 @@ class FsmEngineServiceTest extends TestCase
         $config->shouldReceive('get')->with('fsm.verbs.dispatch_transitioned_verb', true)->andReturn(false);
         $config->shouldReceive('get')->with('fsm.logging.excluded_context_properties', [])->andReturn([]);
 
-        $dispatcher = Mockery::mock(\Illuminate\Contracts\Events\Dispatcher::class);
+        $dispatcher = Mockery::mock(Dispatcher::class);
         $dispatcher->shouldReceive('dispatch')->andReturn(null);
-        $metrics = new \Fsm\Services\FsmMetricsService($dispatcher);
+        $metrics = new FsmMetricsService($dispatcher);
         $service = new FsmEngineService($registry, $logger, $metrics, $db, $config);
 
         try {
@@ -996,10 +1008,10 @@ class FsmEngineServiceTest extends TestCase
         $config->shouldReceive('get')->with('fsm.logging.excluded_context_properties', [])->andReturn([]);
         $config->shouldReceive('get')->with('fsm.debug', false)->andReturn(false);
 
-        $dispatcher = Mockery::mock(\Illuminate\Contracts\Events\Dispatcher::class);
+        $dispatcher = Mockery::mock(Dispatcher::class);
         $dispatcher->shouldReceive('dispatch')->andReturn(null);
 
-        $metrics = Mockery::mock(\Fsm\Services\FsmMetricsService::class);
+        $metrics = Mockery::mock(FsmMetricsService::class);
         $metrics->shouldReceive('incrementTransition')->byDefault();
         $metrics->shouldReceive('incrementFailure')->byDefault();
 
@@ -1346,16 +1358,16 @@ class FsmEngineServiceTest extends TestCase
         $service = $this->makeService($definition);
         $model = new EngineModel(['status' => EngineState::Pending]);
         $events = [];
-        \Illuminate\Support\Facades\Event::listen(
-            \Fsm\Events\TransitionAttempted::class,
-            function (\Fsm\Events\TransitionAttempted $event) use (&$events) {
+        Event::listen(
+            TransitionAttempted::class,
+            function (TransitionAttempted $event) use (&$events) {
                 $events[] = $event;
             }
         );
         $service->performTransition($model, 'status', EngineState::Processing);
         $attempted = null;
         foreach ($events as $event) {
-            if ($event instanceof \Fsm\Events\TransitionAttempted) {
+            if ($event instanceof TransitionAttempted) {
                 $attempted = $event;
                 break;
             }
@@ -1483,21 +1495,21 @@ class FsmEngineServiceTest extends TestCase
     {
         $wildcardActionCalled = false;
         $wildcardTransition = new TransitionDefinition(
-            fromState: \Fsm\Constants::STATE_WILDCARD,
+            fromState: Constants::STATE_WILDCARD,
             toState: EngineState::Processing,
             event: null,
             guards: [],
-            actions: [new \Fsm\Data\TransitionAction(function () use (&$wildcardActionCalled) {
+            actions: [new TransitionAction(function () use (&$wildcardActionCalled) {
                 $wildcardActionCalled = true;
             })]
         );
-        $definition = new \Fsm\Data\FsmRuntimeDefinition(
+        $definition = new FsmRuntimeDefinition(
             EngineModel::class,
             'status',
             [
-                new \Fsm\Data\StateDefinition(EngineState::Pending),
-                new \Fsm\Data\StateDefinition(EngineState::Processing),
-                new \Fsm\Data\StateDefinition(EngineState::Done), // Ensure Done is included
+                new StateDefinition(EngineState::Pending),
+                new StateDefinition(EngineState::Processing),
+                new StateDefinition(EngineState::Done), // Ensure Done is included
             ],
             [$wildcardTransition],
             EngineState::Pending
@@ -1515,7 +1527,7 @@ class FsmEngineServiceTest extends TestCase
 
         // Test guard error handling
         $failingGuard = new TransitionGuard(function () {
-            throw new \RuntimeException('Guard failed');
+            throw new RuntimeException('Guard failed');
         }, [], 'failing guard');
 
         $transition = new TransitionDefinition(
@@ -1545,7 +1557,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_regression_perform_transition_exception_to_state_is_original(): void
     {
         $action = new TransitionAction(function () {
-            throw new \RuntimeException('action failed');
+            throw new RuntimeException('action failed');
         }, [], false);
         $transition = new TransitionDefinition(
             fromState: EngineState::Pending,
@@ -1620,10 +1632,10 @@ class FsmEngineServiceTest extends TestCase
         );
 
         // Create a metrics service that throws an exception
-        $dispatcher = Mockery::mock(\Illuminate\Contracts\Events\Dispatcher::class);
+        $dispatcher = Mockery::mock(Dispatcher::class);
         $dispatcher->shouldReceive('dispatch')->andReturn(null);
 
-        $failingMetrics = Mockery::mock(\Fsm\Services\FsmMetricsService::class);
+        $failingMetrics = Mockery::mock(FsmMetricsService::class);
         $failingMetrics->shouldReceive('record')
             ->andThrow(new RuntimeException('Metrics service failed'));
 
@@ -1681,12 +1693,12 @@ class FsmEngineServiceTest extends TestCase
         $model = new EngineModel(['status' => EngineState::Pending->value]);
 
         // Use reflection to access the private buildJobPayload method
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('buildJobPayload');
         $method->setAccessible(true);
 
         // Create TransitionInput with null context
-        $input = new \Fsm\Data\TransitionInput($model, EngineState::Pending, EngineState::Processing, null);
+        $input = new TransitionInput($model, EngineState::Pending, EngineState::Processing, null);
 
         $payload = $method->invoke($service, $input);
 
@@ -1717,13 +1729,13 @@ class FsmEngineServiceTest extends TestCase
         $model = new EngineModel(['status' => EngineState::Pending->value]);
 
         // Use reflection to access the private buildJobPayload method
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('buildJobPayload');
         $method->setAccessible(true);
 
         // Create TransitionInput with valid context
         $context = new TestContextData('test message', 123);
-        $input = new \Fsm\Data\TransitionInput($model, EngineState::Pending, EngineState::Processing, $context);
+        $input = new TransitionInput($model, EngineState::Pending, EngineState::Processing, $context);
 
         $payload = $method->invoke($service, $input);
 
@@ -1762,13 +1774,13 @@ class FsmEngineServiceTest extends TestCase
         $model = new EngineModel(['status' => EngineState::Pending->value]);
 
         // Use reflection to access the private buildJobPayload method
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('buildJobPayload');
         $method->setAccessible(true);
 
         // Create TransitionInput with failing context
         $context = new FailingContextDto('test message');
-        $input = new \Fsm\Data\TransitionInput($model, EngineState::Pending, EngineState::Processing, $context);
+        $input = new TransitionInput($model, EngineState::Pending, EngineState::Processing, $context);
 
         // Capture log output to verify error logging
         $logMessages = [];
@@ -1788,11 +1800,11 @@ class FsmEngineServiceTest extends TestCase
     public function test_build_job_payload_handles_context_payload_returns_null(): void
     {
         // Create a mock context that returns null from contextPayload()
-        $mockContext = Mockery::mock(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class);
+        $mockContext = Mockery::mock(ArgonautDTOContract::class);
         $mockContext->shouldReceive('toArray')->andReturn(['test' => 'data']);
 
         // Create a TransitionInput that will return null from contextPayload()
-        $input = Mockery::mock(\Fsm\Data\TransitionInput::class);
+        $input = Mockery::mock(TransitionInput::class);
         $input->context = $mockContext;
         $input->model = new EngineModel(['status' => EngineState::Pending->value]);
         $input->fromState = EngineState::Pending;
@@ -1825,7 +1837,7 @@ class FsmEngineServiceTest extends TestCase
         $service = $this->makeService($definition);
 
         // Use reflection to access the private buildJobPayload method
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('buildJobPayload');
         $method->setAccessible(true);
 
@@ -1858,12 +1870,12 @@ class FsmEngineServiceTest extends TestCase
         $model = new EngineModel(['status' => EngineState::Pending->value]);
 
         // Use reflection to access the private buildJobPayload method
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('buildJobPayload');
         $method->setAccessible(true);
 
         $context = new TestContextDto('test info');
-        $input = new \Fsm\Data\TransitionInput(
+        $input = new TransitionInput(
             $model,
             EngineState::Pending,
             EngineState::Processing,
@@ -1931,7 +1943,7 @@ class FsmEngineServiceTest extends TestCase
         $service = $this->makeService($definition);
 
         // Use reflection to access the private stringifyCallable method
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('stringifyCallable');
         $method->setAccessible(true);
 
@@ -1962,7 +1974,7 @@ class FsmEngineServiceTest extends TestCase
         $service = $this->makeService($definition);
 
         // Use reflection to access the private stringifyCallable method
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('stringifyCallable');
         $method->setAccessible(true);
 
@@ -1996,7 +2008,7 @@ class FsmEngineServiceTest extends TestCase
         $service = $this->makeService($definition);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -2046,7 +2058,7 @@ class FsmEngineServiceTest extends TestCase
         $service = $this->makeService($definition);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -2055,7 +2067,7 @@ class FsmEngineServiceTest extends TestCase
         $parameters = ['test_param'];
 
         // Mock App::call to verify it's called with the correct string format
-        \Illuminate\Support\Facades\App::shouldReceive('call')
+        App::shouldReceive('call')
             ->once()
             ->with(TestCallbackClass::class.'@staticHandle', $parameters)
             ->andReturn('mocked result');
@@ -2085,7 +2097,7 @@ class FsmEngineServiceTest extends TestCase
         $service = $this->makeService($definition);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -2096,7 +2108,7 @@ class FsmEngineServiceTest extends TestCase
         $parameters = ['test'];
 
         // Mock App::call to verify it's called with the closure
-        \Illuminate\Support\Facades\App::shouldReceive('call')
+        App::shouldReceive('call')
             ->once()
             ->with($closure, $parameters)
             ->andReturn('mocked closure result');
@@ -2126,7 +2138,7 @@ class FsmEngineServiceTest extends TestCase
         $service = $this->makeService($definition);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($service);
+        $reflection = new ReflectionClass($service);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -2135,7 +2147,7 @@ class FsmEngineServiceTest extends TestCase
         $parameters = ['test_param'];
 
         // Mock App::call to verify it's called with the string callable
-        \Illuminate\Support\Facades\App::shouldReceive('call')
+        App::shouldReceive('call')
             ->once()
             ->with($callable, $parameters)
             ->andReturn('mocked string result');
@@ -2152,9 +2164,9 @@ class FsmEngineServiceTest extends TestCase
         {
             public bool $called = false;
 
-            public ?\Fsm\Data\TransitionInput $input = null;
+            public ?TransitionInput $input = null;
 
-            public function guardMethod(\Fsm\Data\TransitionInput $input): bool
+            public function guardMethod(TransitionInput $input): bool
             {
                 $this->called = true;
                 $this->input = $input;
@@ -2192,7 +2204,7 @@ class FsmEngineServiceTest extends TestCase
 
         // Verify the guard was called on the original instance
         $this->assertTrue($guardSpy->called);
-        $this->assertInstanceOf(\Fsm\Data\TransitionInput::class, $guardSpy->input);
+        $this->assertInstanceOf(TransitionInput::class, $guardSpy->input);
         $this->assertSame($model, $result);
     }
 
@@ -2203,16 +2215,16 @@ class FsmEngineServiceTest extends TestCase
         {
             public bool $called = false;
 
-            public ?\Fsm\Data\TransitionInput $input = null;
+            public ?TransitionInput $input = null;
 
-            public function callbackMethod(\Fsm\Data\TransitionInput $input): void
+            public function callbackMethod(TransitionInput $input): void
             {
                 $this->called = true;
                 $this->input = $input;
             }
         };
 
-        $callback = new \Fsm\Data\TransitionCallback(
+        $callback = new TransitionCallback(
             callable: [$callbackSpy, 'callbackMethod'],
             queued: false
         );
@@ -2245,7 +2257,7 @@ class FsmEngineServiceTest extends TestCase
 
         // Verify the callback was called on the original instance
         $this->assertTrue($callbackSpy->called);
-        $this->assertInstanceOf(\Fsm\Data\TransitionInput::class, $callbackSpy->input);
+        $this->assertInstanceOf(TransitionInput::class, $callbackSpy->input);
         $this->assertSame($model, $result);
     }
 
@@ -2256,9 +2268,9 @@ class FsmEngineServiceTest extends TestCase
         {
             public bool $called = false;
 
-            public ?\Fsm\Data\TransitionInput $input = null;
+            public ?TransitionInput $input = null;
 
-            public function actionMethod(\Fsm\Data\TransitionInput $input): void
+            public function actionMethod(TransitionInput $input): void
             {
                 $this->called = true;
                 $this->input = $input;
@@ -2293,13 +2305,13 @@ class FsmEngineServiceTest extends TestCase
 
         // Verify the action was called on the original instance
         $this->assertTrue($actionSpy->called);
-        $this->assertInstanceOf(\Fsm\Data\TransitionInput::class, $actionSpy->input);
+        $this->assertInstanceOf(TransitionInput::class, $actionSpy->input);
         $this->assertSame($model, $result);
     }
 
     public function test_queued_callbacks_cannot_use_object_instances(): void
     {
-        $callback = new \Fsm\Data\TransitionCallback(
+        $callback = new TransitionCallback(
             callable: [new TestCallbackClass, 'handle'], // Object instance
             queued: true
         );
@@ -2328,7 +2340,7 @@ class FsmEngineServiceTest extends TestCase
         $model = new EngineModel(['status' => EngineState::Pending->value]);
 
         // Execute the transition - should throw exception with proper message
-        $this->expectException(\Fsm\Exceptions\FsmTransitionFailedException::class);
+        $this->expectException(FsmTransitionFailedException::class);
         $this->expectExceptionMessage('Queued callbacks cannot use object instances. Use string callables instead.');
 
         $service->performTransition($model, 'status', EngineState::Processing);
@@ -2360,7 +2372,7 @@ class FsmEngineServiceTest extends TestCase
         $model = new EngineModel(['status' => EngineState::Pending->value]);
 
         // Execute the transition - should throw exception with proper message
-        $this->expectException(\Fsm\Exceptions\FsmTransitionFailedException::class);
+        $this->expectException(FsmTransitionFailedException::class);
         $this->expectExceptionMessage('Queued actions cannot use object instances. Use string callables instead.');
 
         $service->performTransition($model, 'status', EngineState::Processing);
@@ -2370,7 +2382,7 @@ class FsmEngineServiceTest extends TestCase
     {
         Queue::fake();
 
-        $callback = new \Fsm\Data\TransitionCallback(
+        $callback = new TransitionCallback(
             callable: [TestCallbackClass::class, 'staticHandle'], // Class string
             queued: true
         );
@@ -2404,7 +2416,7 @@ class FsmEngineServiceTest extends TestCase
         $this->assertSame(EngineState::Processing->value, $model->status);
 
         // Verify that the job was dispatched
-        Queue::assertPushed(\Fsm\Jobs\RunCallbackJob::class);
+        Queue::assertPushed(RunCallbackJob::class);
     }
 
     public function test_queued_actions_can_use_class_string_callables(): void
@@ -2440,12 +2452,12 @@ class FsmEngineServiceTest extends TestCase
         $this->assertSame(EngineState::Processing->value, $model->status);
 
         // Verify that the job was dispatched
-        Queue::assertPushed(\Fsm\Jobs\RunActionJob::class);
+        Queue::assertPushed(RunActionJob::class);
     }
 
     public function test_queued_callbacks_cannot_use_closures(): void
     {
-        $callback = new \Fsm\Data\TransitionCallback(
+        $callback = new TransitionCallback(
             callable: function () {
                 return 'test';
             }, // Closure
@@ -2476,7 +2488,7 @@ class FsmEngineServiceTest extends TestCase
         $model = new EngineModel(['status' => EngineState::Pending->value]);
 
         // Execute the transition - should throw exception
-        $this->expectException(\Fsm\Exceptions\FsmTransitionFailedException::class);
+        $this->expectException(FsmTransitionFailedException::class);
         $this->expectExceptionMessage('Queued callbacks cannot use closures. Use string callables instead.');
 
         $service->performTransition($model, 'status', EngineState::Processing);
@@ -2510,7 +2522,7 @@ class FsmEngineServiceTest extends TestCase
         $model = new EngineModel(['status' => EngineState::Pending->value]);
 
         // Execute the transition - should throw exception
-        $this->expectException(\Fsm\Exceptions\FsmTransitionFailedException::class);
+        $this->expectException(FsmTransitionFailedException::class);
         $this->expectExceptionMessage('Queued actions cannot use closures. Use string callables instead.');
 
         $service->performTransition($model, 'status', EngineState::Processing);
@@ -2522,7 +2534,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_filter_context_with_compatible_from_method_works(): void
     {
         // Create a test DTO that extends Dto with compatible from() method
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends Dto
         {
             public string $message;
 
@@ -2547,14 +2559,14 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
 
         $filtered = $service->filterContextForLogging($testDto);
 
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
         $this->assertSame('test', $filtered->message);
         $this->assertArrayNotHasKey('secret', $filtered->toArray());
     }
@@ -2566,7 +2578,7 @@ class FsmEngineServiceTest extends TestCase
     {
 
         // Create a test DTO with incompatible from() method (wrong parameter type)
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends Dto
         {
             public string $message;
 
@@ -2610,14 +2622,14 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
 
         $filtered = $service->filterContextForLogging($testDto);
 
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
         $this->assertSame('test', $filtered->message);
         $this->assertArrayNotHasKey('secret', $filtered->toArray());
     }
@@ -2629,7 +2641,7 @@ class FsmEngineServiceTest extends TestCase
     {
 
         // Create a test DTO with private from() method
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends Dto
         {
             public string $message;
 
@@ -2669,14 +2681,14 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
 
         $filtered = $service->filterContextForLogging($testDto);
 
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
         $this->assertSame('test', $filtered->message);
         $this->assertArrayNotHasKey('secret', $filtered->toArray());
     }
@@ -2688,7 +2700,7 @@ class FsmEngineServiceTest extends TestCase
     {
 
         // Create a test DTO with no from() method
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends Dto
         {
             public string $message;
 
@@ -2723,14 +2735,14 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
 
         $filtered = $service->filterContextForLogging($testDto);
 
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
         $this->assertSame('test', $filtered->message);
         $this->assertArrayNotHasKey('secret', $filtered->toArray());
     }
@@ -2742,7 +2754,7 @@ class FsmEngineServiceTest extends TestCase
     {
 
         // Create a test DTO that implements ArgonautDTOContract but doesn't extend Dto
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) implements ArgonautDTOContract
         {
             public string $message;
 
@@ -2786,14 +2798,14 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
 
         $filtered = $service->filterContextForLogging($testDto);
 
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
         $this->assertSame('test', $filtered->message);
         $this->assertArrayNotHasKey('secret', $filtered->toArray());
     }
@@ -2805,7 +2817,7 @@ class FsmEngineServiceTest extends TestCase
     {
 
         // Create a test DTO that implements ArgonautDTOContract but doesn't extend Dto
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) implements ArgonautDTOContract
         {
             public string $message;
 
@@ -2853,14 +2865,14 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
 
         $filtered = $service->filterContextForLogging($testDto);
 
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
         $this->assertSame('test', $filtered->message);
         $this->assertArrayNotHasKey('secret', $filtered->toArray());
     }
@@ -2872,7 +2884,7 @@ class FsmEngineServiceTest extends TestCase
     {
 
         // Create a test DTO with constructor that doesn't accept array
-        $testDto = new class('test') implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $testDto = new class('test') implements ArgonautDTOContract
         {
             public string $message;
 
@@ -2906,7 +2918,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -2925,7 +2937,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             Mockery::mock(ConfigRepository::class)
         );
@@ -2940,7 +2952,7 @@ class FsmEngineServiceTest extends TestCase
      */
     public function test_parameter_accepts_array_method_mutations(): void
     {
-        $reflection = new \ReflectionClass(FsmEngineService::class);
+        $reflection = new ReflectionClass(FsmEngineService::class);
         $method = $reflection->getMethod('parameterAcceptsArray');
         $method->setAccessible(true);
 
@@ -2950,8 +2962,8 @@ class FsmEngineServiceTest extends TestCase
 
         // Test direct array type (should return true)
         $param = Mockery::mock(\ReflectionParameter::class);
-        $param->shouldReceive('getType')->andReturn(Mockery::mock(\ReflectionNamedType::class));
-        $arrayType = Mockery::mock(\ReflectionNamedType::class);
+        $param->shouldReceive('getType')->andReturn(Mockery::mock(ReflectionNamedType::class));
+        $arrayType = Mockery::mock(ReflectionNamedType::class);
         $arrayType->shouldReceive('getName')->andReturn('array');
         $param = new \ReflectionParameter([FsmEngineService::class, 'parameterAcceptsArray'], 'paramType');
         // We can't easily mock this without complex setup, so let's test with real reflection
@@ -2981,7 +2993,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_filter_context_with_wrong_parameter_count_fallback(): void
     {
         // Create a DTO with from() method that has 2 parameters instead of 1
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends Dto
         {
             public string $message;
 
@@ -3022,7 +3034,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -3031,7 +3043,7 @@ class FsmEngineServiceTest extends TestCase
 
         // Should fall back to constructor since from() has wrong parameter count
         $this->assertNotNull($filtered);
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
         $this->assertSame('test', $filtered->message);
         $this->assertArrayNotHasKey('secret', $filtered->toArray());
     }
@@ -3042,7 +3054,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_filter_context_with_no_from_method_fallback(): void
     {
         // Create a DTO without from() method
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends Dto
         {
             public string $message;
 
@@ -3077,7 +3089,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -3086,7 +3098,7 @@ class FsmEngineServiceTest extends TestCase
 
         // Should fall back to constructor since there's no from() method
         $this->assertNotNull($filtered);
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
         $this->assertSame('test', $filtered->message);
         $this->assertArrayNotHasKey('secret', $filtered->toArray());
     }
@@ -3098,7 +3110,7 @@ class FsmEngineServiceTest extends TestCase
     {
 
         // Create a test DTO
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends Dto
         {
             public string $message;
 
@@ -3133,7 +3145,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -3150,7 +3162,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_filter_context_reflection_logic_mutations(): void
     {
         // Create a DTO with from() method that has exactly 1 parameter (array)
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends Dto
         {
             public string $message;
 
@@ -3190,7 +3202,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -3198,7 +3210,7 @@ class FsmEngineServiceTest extends TestCase
         $filtered = $service->filterContextForLogging($testDto);
 
         // Verify the from() method was called and filtering worked
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
         $this->assertSame('test', $filtered->message);
         $this->assertArrayNotHasKey('secret', $filtered->toArray());
     }
@@ -3209,7 +3221,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_filter_context_parameter_counting_mutations(): void
     {
         // Create a DTO with from() method that has 0 parameters (mutation target)
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends Dto
         {
             public string $message;
 
@@ -3249,7 +3261,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -3258,7 +3270,7 @@ class FsmEngineServiceTest extends TestCase
 
         // Test that the context filtering logic works correctly
         $this->assertNotNull($filtered);
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
         // The context should be properly filtered (may be reconstructed or original depending on implementation)
         $this->assertSame('test', $filtered->message);
         $this->assertArrayNotHasKey('secret', $filtered->toArray());
@@ -3270,7 +3282,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_filter_context_parameter_type_checking_mutations(): void
     {
         // Create a DTO with from() method that has 1 parameter but wrong type (string instead of array)
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends Dto
         {
             public string $message;
 
@@ -3310,7 +3322,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -3320,7 +3332,7 @@ class FsmEngineServiceTest extends TestCase
         // Test that the context filtering logic works correctly
         // The implementation may reconstruct the DTO or fall back to original depending on the DTO's constructor
         $this->assertNotNull($filtered);
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
         // The context should be properly filtered regardless of the reconstruction method
         $this->assertSame('test', $filtered->message);
         $this->assertArrayNotHasKey('secret', $filtered->toArray());
@@ -3332,7 +3344,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_filter_context_method_exists_negation_mutations(): void
     {
         // Create a DTO with no from() method
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends Dto
         {
             public string $message;
 
@@ -3367,7 +3379,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -3376,7 +3388,7 @@ class FsmEngineServiceTest extends TestCase
 
         // Test that the context filtering logic works correctly
         $this->assertNotNull($filtered);
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
         // The context should be properly filtered (may be reconstructed or original depending on implementation)
         $this->assertSame('test', $filtered->message);
         $this->assertArrayNotHasKey('secret', $filtered->toArray());
@@ -3388,7 +3400,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_parameter_accepts_array_mutations(): void
     {
         // Create a DTO with array parameter to test the parameterAcceptsArray method
-        $testDto = new class(['message' => 'test']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test']) extends Dto
         {
             public string $message;
 
@@ -3418,7 +3430,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -3427,7 +3439,7 @@ class FsmEngineServiceTest extends TestCase
 
         // Test that the parameter type checking logic works
         $this->assertNotNull($filtered);
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
     }
 
     /**
@@ -3436,7 +3448,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_parameter_accepts_array_union_types(): void
     {
         // Create a DTO with union type parameter to test union type handling
-        $testDto = new class(['message' => 'test']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test']) extends Dto
         {
             public string $message;
 
@@ -3466,7 +3478,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -3475,7 +3487,7 @@ class FsmEngineServiceTest extends TestCase
 
         // Test that the union type checking logic works
         $this->assertNotNull($filtered);
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
     }
 
     /**
@@ -3484,7 +3496,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_parameter_accepts_array_intersection_types(): void
     {
         // Create a DTO with intersection type parameter to test intersection type handling
-        $testDto = new class(['message' => 'test']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test']) extends Dto
         {
             public string $message;
 
@@ -3514,7 +3526,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -3523,7 +3535,7 @@ class FsmEngineServiceTest extends TestCase
 
         // Test that the intersection type checking logic works
         $this->assertNotNull($filtered);
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
     }
 
     /**
@@ -3532,7 +3544,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_reflection_method_accessibility_mutations(): void
     {
         // Create a DTO with private from() method
-        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends \Fsm\Data\Dto
+        $testDto = new class(['message' => 'test', 'secret' => 'hidden']) extends Dto
         {
             public string $message;
 
@@ -3572,7 +3584,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -3581,7 +3593,7 @@ class FsmEngineServiceTest extends TestCase
 
         // Test that the context filtering logic works correctly
         $this->assertNotNull($filtered);
-        $this->assertInstanceOf(\YorCreative\LaravelArgonautDTO\ArgonautDTOContract::class, $filtered);
+        $this->assertInstanceOf(ArgonautDTOContract::class, $filtered);
         // The context should be properly filtered (may be reconstructed or original depending on implementation)
         $this->assertSame('test', $filtered->message);
         $this->assertArrayNotHasKey('secret', $filtered->toArray());
@@ -3593,7 +3605,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_filter_context_protects_against_method_existence_vulnerability(): void
     {
         // Create a DTO class that doesn't have a 'from' method
-        $testDto = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $testDto = new class implements ArgonautDTOContract
         {
             public function __construct(
                 public string $message = 'test'
@@ -3618,7 +3630,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -3635,7 +3647,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_filter_context_protects_against_parameter_count_vulnerability(): void
     {
         // Create a DTO class with 'from' method that has wrong parameter count
-        $testDto = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $testDto = new class implements ArgonautDTOContract
         {
             public function __construct(
                 public string $message = 'test'
@@ -3665,7 +3677,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -3682,7 +3694,7 @@ class FsmEngineServiceTest extends TestCase
     public function test_filter_context_protects_against_parameter_type_vulnerability(): void
     {
         // Create a DTO class with 'from' method that doesn't accept arrays
-        $testDto = new class implements \YorCreative\LaravelArgonautDTO\ArgonautDTOContract
+        $testDto = new class implements ArgonautDTOContract
         {
             public function __construct(
                 public string $message = 'test'
@@ -3712,7 +3724,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             $config
         );
@@ -3731,7 +3743,7 @@ class FsmEngineServiceTest extends TestCase
         $service = new FsmEngineService(
             Mockery::mock(FsmRegistry::class),
             Mockery::mock(FsmLogger::class),
-            Mockery::mock(\Fsm\Services\FsmMetricsService::class),
+            Mockery::mock(FsmMetricsService::class),
             Mockery::mock(DatabaseManager::class),
             Mockery::mock(ConfigRepository::class)
         );
@@ -3768,12 +3780,12 @@ class FsmEngineServiceTest extends TestCase
 // Test helper class for callable tests
 class TestCallbackClass
 {
-    public function handle(\Fsm\Data\TransitionInput $input): void
+    public function handle(TransitionInput $input): void
     {
         // Test method
     }
 
-    public static function staticHandle(\Fsm\Data\TransitionInput $input): string
+    public static function staticHandle(TransitionInput $input): string
     {
         return 'static method called';
     }

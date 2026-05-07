@@ -8,6 +8,7 @@ use Fsm\Data\TransitionAction;
 use Fsm\Data\TransitionCallback;
 use Fsm\Data\TransitionDefinition;
 use Fsm\Data\TransitionGuard;
+use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Tests\Feature\Fsm\Enums\TestFeatureState;
@@ -150,9 +151,9 @@ class TransitionDefinitionConstructorBugFixTest extends TestCase
             onTransitionCallbacks: []
         );
 
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->guards);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->actions);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->onTransitionCallbacks);
+        $this->assertInstanceOf(Collection::class, $transition->guards);
+        $this->assertInstanceOf(Collection::class, $transition->actions);
+        $this->assertInstanceOf(Collection::class, $transition->onTransitionCallbacks);
         $this->assertCount(0, $transition->guards);
         $this->assertCount(0, $transition->actions);
         $this->assertCount(0, $transition->onTransitionCallbacks);
@@ -166,9 +167,9 @@ class TransitionDefinitionConstructorBugFixTest extends TestCase
             toState: TestFeatureState::Active
         );
 
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->guards);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->actions);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->onTransitionCallbacks);
+        $this->assertInstanceOf(Collection::class, $transition->guards);
+        $this->assertInstanceOf(Collection::class, $transition->actions);
+        $this->assertInstanceOf(Collection::class, $transition->onTransitionCallbacks);
         $this->assertCount(0, $transition->guards);
         $this->assertCount(0, $transition->actions);
         $this->assertCount(0, $transition->onTransitionCallbacks);
@@ -340,8 +341,8 @@ class TransitionDefinitionConstructorBugFixTest extends TestCase
         $this->assertSame('activate', $transition->event);
 
         // Verify that collections are properly initialized and not reset
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->guards);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->actions);
-        $this->assertInstanceOf(\Illuminate\Support\Collection::class, $transition->onTransitionCallbacks);
+        $this->assertInstanceOf(Collection::class, $transition->guards);
+        $this->assertInstanceOf(Collection::class, $transition->actions);
+        $this->assertInstanceOf(Collection::class, $transition->onTransitionCallbacks);
     }
 }

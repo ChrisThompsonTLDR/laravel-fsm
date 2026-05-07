@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Fsm\Data\TransitionInput;
 use Fsm\Guards\CompositeGuard;
+use Illuminate\Database\Eloquent\Model;
 use Tests\TestCase;
 
 /**
@@ -37,14 +38,14 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
         // Test with non-existent method (should cause ReflectionException)
         $parameters = ['param1' => 'hello'];
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Failed to create reflection for method 'nonExistentMethod' on class");
 
         $method->invoke($composite, [$guardSpy, 'nonExistentMethod'], $parameters);
@@ -67,7 +68,7 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -77,9 +78,9 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
         try {
             $method->invoke($composite, [$guardSpy, 'nonExistentMethod'], $parameters);
             $this->fail('Expected InvalidArgumentException to be thrown');
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             // Verify the original ReflectionException is preserved as cause
-            $this->assertInstanceOf(\ReflectionException::class, $e->getPrevious());
+            $this->assertInstanceOf(ReflectionException::class, $e->getPrevious());
             $this->assertStringContainsString('nonExistentMethod', $e->getPrevious()->getMessage());
         }
     }
@@ -95,20 +96,20 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
             public function __call(string $name, array $arguments)
             {
                 // This will cause reflection to fail when trying to get method info
-                throw new \ReflectionException("Method {$name} does not exist");
+                throw new ReflectionException("Method {$name} does not exist");
             }
         };
 
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
         $parameters = ['param1' => 'hello'];
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Failed to create reflection for method 'testMethod' on class");
 
         $method->invoke($composite, [$guardSpy, 'testMethod'], $parameters);
@@ -131,14 +132,14 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
         $parameters = ['param1' => 'hello'];
 
         // Reflection will fail when trying to access private method
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Cannot access private method 'privateMethod' on class");
 
         $method->invoke($composite, [$guardSpy, 'privateMethod'], $parameters);
@@ -161,14 +162,14 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
         $parameters = ['param1' => 'hello'];
 
         // Reflection will fail when trying to access protected method
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Cannot access protected method 'protectedMethod' on class");
 
         $method->invoke($composite, [$guardSpy, 'protectedMethod'], $parameters);
@@ -191,13 +192,13 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
         $parameters = ['param1' => 'hello'];
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Failed to create reflection for method 'abstractMethod' on class");
 
         $method->invoke($composite, [$abstractClass, 'abstractMethod'], $parameters);
@@ -227,7 +228,7 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -263,7 +264,7 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
@@ -272,7 +273,7 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
         try {
             $method->invoke($composite, [$guardSpy, 'nonExistentMethod'], $parameters);
             $this->fail('Expected InvalidArgumentException to be thrown');
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             // Verify the error message includes the correct class and method names
             $this->assertStringContainsString('nonExistentMethod', $e->getMessage());
             $this->assertStringContainsString(get_class($guardSpy), $e->getMessage());
@@ -294,7 +295,7 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
             }
         };
 
-        $childClass = new class($parentClass) extends \stdClass
+        $childClass = new class($parentClass) extends stdClass
         {
             public function childMethod(): bool
             {
@@ -305,14 +306,14 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
         $parameters = ['param1' => 'hello'];
 
         // Test with non-existent method on child class
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Failed to create reflection for method 'nonExistentMethod' on class");
 
         $method->invoke($composite, [$childClass, 'nonExistentMethod'], $parameters);
@@ -335,14 +336,14 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
         $parameters = ['param1' => 'hello'];
 
         // Test with non-existent method on anonymous class
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Failed to create reflection for method 'invalidMethod' on class");
 
         $method->invoke($composite, [$anonymousClass, 'invalidMethod'], $parameters);
@@ -354,7 +355,7 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
     public function test_error_handling_with_interfaces(): void
     {
         // Create a class that implements an interface
-        $interfaceClass = new class implements \Iterator
+        $interfaceClass = new class implements Iterator
         {
             public function current(): mixed
             {
@@ -385,14 +386,14 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
         $composite = CompositeGuard::create([]);
 
         // Use reflection to access the private executeCallableWithInstance method
-        $reflection = new \ReflectionClass($composite);
+        $reflection = new ReflectionClass($composite);
         $method = $reflection->getMethod('executeCallableWithInstance');
         $method->setAccessible(true);
 
         $parameters = ['param1' => 'hello'];
 
         // Test with non-existent method on interface implementing class
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Failed to create reflection for method 'nonExistentMethod' on class");
 
         $method->invoke($composite, [$interfaceClass, 'nonExistentMethod'], $parameters);
@@ -400,7 +401,7 @@ class CompositeGuardReflectionExceptionHandlingTest extends TestCase
 
     private function createTransitionInput(): TransitionInput
     {
-        $model = Mockery::mock(\Illuminate\Database\Eloquent\Model::class);
+        $model = Mockery::mock(Model::class);
         $model->shouldReceive('getForeignKey')->andReturn('test_id');
 
         return new TransitionInput(

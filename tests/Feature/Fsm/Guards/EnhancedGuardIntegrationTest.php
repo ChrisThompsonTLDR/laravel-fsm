@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Fsm\Guards;
 
+use Fsm\Exceptions\FsmTransitionFailedException;
 use Fsm\FsmBuilder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
@@ -83,7 +84,7 @@ class EnhancedGuardIntegrationTest extends FsmTestCase
 
         // Act & Assert - transition should fail for unauthorized user
         expect(fn () => $model->transitionFsm('status', TestFeatureState::Active))
-            ->toThrow(\Fsm\Exceptions\FsmTransitionFailedException::class);
+            ->toThrow(FsmTransitionFailedException::class);
     }
 
     public function test_critical_guard_stops_execution_on_failure(): void
@@ -112,7 +113,7 @@ class EnhancedGuardIntegrationTest extends FsmTestCase
 
         // Act & Assert
         expect(fn () => $model->transitionFsm('status', TestFeatureState::Active))
-            ->toThrow(\Fsm\Exceptions\FsmTransitionFailedException::class);
+            ->toThrow(FsmTransitionFailedException::class);
 
         // The regular guard should not have executed due to stopOnFailure
         expect($executed)->toBe(['critical']);

@@ -6,10 +6,13 @@ namespace Tests\Feature\Fsm\Http\Controllers;
 
 use Fsm\FsmBuilder;
 use Fsm\FsmServiceProvider;
+use Fsm\Http\Controllers\FsmReplayApiController;
+use Glhd\Bits\Support\BitsServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\TestCase;
 use Tests\Feature\Fsm\Enums\TestFeatureState;
 use Tests\Feature\Fsm\Models\TestModel;
+use Thunk\Verbs\VerbsServiceProvider;
 
 class FsmReplayApiControllerTest extends TestCase
 {
@@ -18,9 +21,9 @@ class FsmReplayApiControllerTest extends TestCase
     protected function getPackageProviders($app)
     {
         return [
-            \Glhd\Bits\Support\BitsServiceProvider::class,
+            BitsServiceProvider::class,
             FsmServiceProvider::class,
-            \Thunk\Verbs\VerbsServiceProvider::class,
+            VerbsServiceProvider::class,
         ];
     }
 
@@ -40,7 +43,7 @@ class FsmReplayApiControllerTest extends TestCase
             __DIR__.'/../../../../database/migrations',
         ]);
 
-        $app['router']->post('fsm/replay/history', [\Fsm\Http\Controllers\FsmReplayApiController::class, 'getHistory'])->name('fsm.replay.history');
+        $app['router']->post('fsm/replay/history', [FsmReplayApiController::class, 'getHistory'])->name('fsm.replay.history');
     }
 
     protected function setUp(): void

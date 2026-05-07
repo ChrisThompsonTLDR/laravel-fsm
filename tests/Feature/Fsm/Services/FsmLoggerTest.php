@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Fsm\Services;
 
+use Fsm\Contracts\FsmStateEnum;
 use Fsm\Models\FsmLog;
 use Fsm\Services\FsmLogger;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,6 +14,7 @@ use Tests\Feature\Fsm\Data\TestContextDto;
 use Tests\Feature\Fsm\Enums\TestFeatureState;
 use Tests\Feature\Fsm\Models\TestModel;
 use Tests\FsmTestCase;
+use Thunk\Verbs\Facades\Verbs;
 
 class FsmLoggerTest extends FsmTestCase
 {
@@ -141,7 +143,7 @@ class FsmLoggerTest extends FsmTestCase
         $mockLogger = Mockery::mock();
         $mockLogger->shouldReceive('info')
             ->once()
-            ->with('FSM transition succeeded', \Mockery::on(function ($data) {
+            ->with('FSM transition succeeded', Mockery::on(function ($data) {
                 return isset($data['model_type']) &&
                        isset($data['model_id']) &&
                        isset($data['fsm_column']) &&
@@ -647,7 +649,7 @@ class FsmLoggerTest extends FsmTestCase
     public function test_log_transition_with_verb_event_id_retrieves_subject(): void
     {
         // Skip this test if Verbs is not available
-        if (! class_exists(\Thunk\Verbs\Facades\Verbs::class)) {
+        if (! class_exists(Verbs::class)) {
             $this->markTestSkipped('Verbs package is not available');
 
             return;
@@ -678,7 +680,7 @@ class FsmLoggerTest extends FsmTestCase
     public function test_log_transition_negates_verb_event_id_check(): void
     {
         // Skip this test if Verbs is not available
-        if (! class_exists(\Thunk\Verbs\Facades\Verbs::class)) {
+        if (! class_exists(Verbs::class)) {
             $this->markTestSkipped('Verbs package is not available');
 
             return;
@@ -708,7 +710,7 @@ class FsmLoggerTest extends FsmTestCase
     public function test_log_success_array_merge_includes_subject_data(): void
     {
         // Skip this test if Verbs is not available
-        if (! class_exists(\Thunk\Verbs\Facades\Verbs::class)) {
+        if (! class_exists(Verbs::class)) {
             $this->markTestSkipped('Verbs package is not available');
 
             return;
@@ -736,7 +738,7 @@ class FsmLoggerTest extends FsmTestCase
     public function test_log_failure_array_merge_includes_subject_data(): void
     {
         // Skip this test if Verbs is not available
-        if (! class_exists(\Thunk\Verbs\Facades\Verbs::class)) {
+        if (! class_exists(Verbs::class)) {
             $this->markTestSkipped('Verbs package is not available');
 
             return;
@@ -802,7 +804,7 @@ class FsmLoggerTest extends FsmTestCase
     public function test_reflection_accessibility_properly_set(): void
     {
         // Create a state object with private user_id property that also has a getter
-        $state = new class implements \Fsm\Contracts\FsmStateEnum
+        $state = new class implements FsmStateEnum
         {
             private string $user_id = 'test_user_456';
 
@@ -849,7 +851,7 @@ class FsmLoggerTest extends FsmTestCase
     public function test_array_merge_mutations_in_log_data_detected(): void
     {
         // Skip this test if Verbs is not available
-        if (! class_exists(\Thunk\Verbs\Facades\Verbs::class)) {
+        if (! class_exists(Verbs::class)) {
             $this->markTestSkipped('Verbs package is not available');
 
             return;
@@ -938,7 +940,7 @@ class FsmLoggerTest extends FsmTestCase
         $mockLogger = Mockery::mock();
         $mockLogger->shouldReceive('info')
             ->once()
-            ->with('FSM transition succeeded', \Mockery::on(function ($data) {
+            ->with('FSM transition succeeded', Mockery::on(function ($data) {
                 return isset($data['model_type']) &&
                        isset($data['model_id']) &&
                        isset($data['fsm_column']) &&
@@ -997,7 +999,7 @@ class FsmLoggerTest extends FsmTestCase
     public function test_array_merge_mutations_in_log_data(): void
     {
         // Skip this test if Verbs is not available
-        if (! class_exists(\Thunk\Verbs\Facades\Verbs::class)) {
+        if (! class_exists(Verbs::class)) {
             $this->markTestSkipped('Verbs package is not available');
 
             return;
@@ -1142,7 +1144,7 @@ class FsmLoggerTest extends FsmTestCase
     public function test_verb_event_checking_mutations(): void
     {
         // Skip this test if Verbs is not available
-        if (! class_exists(\Thunk\Verbs\Facades\Verbs::class)) {
+        if (! class_exists(Verbs::class)) {
             $this->markTestSkipped('Verbs package is not available');
 
             return;
