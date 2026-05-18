@@ -395,8 +395,21 @@ class FsmEngineServiceMutationTest extends TestCase
     {
         // Test with different config scenarios to catch mutations in default value handling
 
+        // Create a simple test DTO with the properties we need to test
+        $testDto = new class(['sensitive' => 'secret', 'normal' => 'visible']) extends Dto
+        {
+            public string $sensitive;
+
+            public string $normal;
+
+            public function __construct(array $data)
+            {
+                parent::__construct($data);
+            }
+        };
+
         // Test with null excluded properties (should include all data)
-        $context = new TestContextDto(['sensitive' => 'secret', 'normal' => 'visible']);
+        $context = $testDto;
         $filtered = $this->service->filterContextForLogging($context);
 
         $this->assertNotNull($filtered, 'Context should be processed - config mutation should be caught');
@@ -406,22 +419,11 @@ class FsmEngineServiceMutationTest extends TestCase
         $this->assertIsArray($filteredArray, 'Filtered context should be array - config mutation should be caught');
 
         // The data should be preserved since no exclusions are configured
-        // TestContextDto might store it differently, but the key point is that filtering works
         $this->assertNotEmpty($filteredArray, 'Filtered array should not be empty - config mutation should be caught');
 
         // Check if the original data is preserved (the mutation we want to catch is when filtering breaks)
-        $hasSensitiveData = false;
-        $hasNormalData = false;
-
-        // Check in info property (for array input)
-        if (isset($filteredArray['info']) && is_array($filteredArray['info'])) {
-            $hasSensitiveData = isset($filteredArray['info']['sensitive']);
-            $hasNormalData = isset($filteredArray['info']['normal']);
-        } else {
-            // Check directly in array (for string input)
-            $hasSensitiveData = isset($filteredArray['sensitive']);
-            $hasNormalData = isset($filteredArray['normal']);
-        }
+        $hasSensitiveData = isset($filteredArray['sensitive']);
+        $hasNormalData = isset($filteredArray['normal']);
 
         // Debug: Check what actually exists in the filtered array
         $this->assertTrue(

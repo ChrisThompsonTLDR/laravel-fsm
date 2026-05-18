@@ -12,12 +12,44 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use RuntimeException;
 use Throwable;
 use Thunk\Verbs\Facades\Verbs;
 use YorCreative\LaravelArgonautDTO\ArgonautDTOContract;
 
 class FsmLogger
 {
+    /**
+     * Get the FsmLog model class from configuration.
+     *
+     * @return class-string<FsmLog>
+     */
+    private function getFsmLogModelClass(): string
+    {
+        $fsmLogClass = $this->config->get('fsm.models.fsm_log', FsmLog::class);
+
+        if (! is_string($fsmLogClass) || $fsmLogClass === '') {
+            throw new RuntimeException('Invalid fsm.models.fsm_log configuration: expected a non-empty class-string.');
+        }
+
+        if (! class_exists($fsmLogClass)) {
+            throw new RuntimeException(sprintf(
+                'Invalid fsm.models.fsm_log configuration: class "%s" does not exist.',
+                $fsmLogClass
+            ));
+        }
+
+        if ($fsmLogClass !== FsmLog::class && ! is_subclass_of($fsmLogClass, FsmLog::class)) {
+            throw new RuntimeException(sprintf(
+                'Invalid fsm.models.fsm_log configuration: class "%s" must extend %s.',
+                $fsmLogClass,
+                FsmLog::class
+            ));
+        }
+
+        return $fsmLogClass;
+    }
+
     /**
      * Extracts user_id from a state object, regardless of property visibility.
      *
@@ -239,7 +271,8 @@ class FsmLogger
             $logData = array_merge($logData, $subject);
         }
 
-        FsmLog::create($logData);
+        $fsmLogClass = $this->getFsmLogModelClass();
+        $fsmLogClass::create($logData);
         $this->logToChannel($logData, false);
     }
 
@@ -281,7 +314,8 @@ class FsmLogger
             $logData = array_merge($logData, $subject);
         }
 
-        FsmLog::create($logData);
+        $fsmLogClass = $this->getFsmLogModelClass();
+        $fsmLogClass::create($logData);
         $this->logToChannel($logData, true);
     }
 
@@ -312,7 +346,6 @@ class FsmLogger
         }
 
         $logData = [
-            'id' => Str::uuid(),
             'subject_id' => $subjectId,
             'subject_type' => $subjectType,
             'model_id' => $model->getKey(),
@@ -326,7 +359,8 @@ class FsmLogger
             'happened_at' => Date::now(),
         ];
 
-        FsmLog::create($logData);
-        $this->logToChannel($logData, true);
+        $fsmLogClass = $this->getFsmLogModelClass();
+        $fsmLogClass::create($logData);
+        $this->logToChannel($logData, false);
     }
 }

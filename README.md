@@ -277,6 +277,93 @@ Event::listen(StateTransitioned::class, function (StateTransitioned $event) {
 });
 ```
 
+### Customizing the FsmLog Model
+
+By default, the `FsmLog` model uses UUIDs for its primary key via Laravel's `HasUuids` trait. If you need to customize the primary key type (e.g., to use auto-incrementing integers or ULIDs instead), you have two options:
+
+### Option 1: Copy the Model (Recommended for changing traits)
+
+Since PHP doesn't allow removing parent traits in child classes, and adding a different key-generation trait (like `HasUlids`) would conflict with the parent's `HasUuids`, the cleanest approach is to copy the entire model into your application:
+
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Contracts\Config\Repository as ConfigRepository;
+use Illuminate\Database\Eloquent\Concerns\HasUlids; // or remove for auto-increment IDs
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+
+class FsmLog extends Model
+{
+    use HasUlids; // Using HasUlids, or remove entirely for auto-increment IDs
+
+    // Copy all properties and methods from Fsm\Models\FsmLog
+    // See: https://github.com/ChrisThompsonTLDR/laravel-fsm/blob/main/src/Fsm/Models/FsmLog.php
+    
+    public $timestamps = false;
+    protected $table = 'fsm_logs';
+    protected $fillable = ['id', 'subject_id', 'subject_type', 'model_id', 'model_type', 'fsm_column', 'from_state', 'to_state', 'transition_event', 'context_snapshot', 'exception_details', 'duration_ms', 'happened_at'];
+    protected $casts = ['happened_at' => 'immutable_datetime', 'context_snapshot' => 'array', 'exception_details' => 'string', 'duration_ms' => 'integer'];
+
+    public function subject(): MorphTo { return $this->morphTo(); }
+    public function model(): MorphTo { return $this->morphTo(); }
+    
+    // Include the booted() method and other methods from the original model
+}
+```
+
+### Option 2: Extend and Override Key Methods
+
+If you prefer to extend the package model and only need to override key generation behavior without changing traits:
+
+```php
+<?php
+
+namespace App\Models;
+
+use Fsm\Models\FsmLog as BaseFsmLog;
+
+class FsmLog extends BaseFsmLog
+{
+    /**
+     * Override to enable auto-incrementing integer keys.
+     */
+    public function getIncrementing(): bool
+    {
+        return true;
+    }
+
+    /**
+     * Get the auto-increment key type.
+     */
+    public function getKeyType(): string
+    {
+        return 'int';
+    }
+    
+    // Add any additional customizations here
+}
+```
+
+### Configure the Package
+
+Whichever option you choose, configure the package to use your custom model in `config/fsm.php`:
+
+```php
+return [
+    // ... other configuration ...
+
+    'models' => [
+        'fsm_log' => \App\Models\FsmLog::class,
+    ],
+];
+```
+
+**Note:** If you change the primary key type, you'll need to create a migration to modify the `fsm_logs` table structure accordingly. The default migration uses `uuid('id')` for the primary key.
+
+
 ## Commands
 
 ### Generate FSM Diagram

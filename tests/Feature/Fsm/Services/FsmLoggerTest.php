@@ -28,6 +28,7 @@ class FsmLoggerTest extends FsmTestCase
     {
         parent::setUp();
 
+        config(['fsm.models.fsm_log' => FsmLog::class]);
         $this->logger = $this->app->make(FsmLogger::class);
         $this->model = TestModel::factory()->create();
     }
@@ -579,12 +580,32 @@ class FsmLoggerTest extends FsmTestCase
         ]);
     }
 
+    public function test_log_transition_throws_readable_runtime_exception_for_invalid_log_model_configuration(): void
+    {
+        config(['fsm.models.fsm_log' => 'Tests\\Support\\MissingFsmLogModel']);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('fsm.models.fsm_log');
+        $this->expectExceptionMessage('does not exist');
+
+        $this->logger->logTransition(
+            $this->model,
+            'status',
+            TestFeatureState::Idle,
+            TestFeatureState::Pending,
+            null,
+            'test_transition',
+            null,
+            150
+        );
+    }
+
     public function test_log_transition_logs_to_channel(): void
     {
         config(['fsm.logging.channel' => 'stack']);
 
         $mockLogger = Mockery::mock();
-        $mockLogger->shouldReceive('error')->once()->andReturnNull(); // logTransition uses error
+        $mockLogger->shouldReceive('info')->once()->andReturnNull(); // logTransition defaults to non-failure
 
         Log::shouldReceive('channel')
             ->with('stack')
@@ -1111,7 +1132,7 @@ class FsmLoggerTest extends FsmTestCase
         config(['fsm.logging.structured' => false]);
 
         $mockLogger = Mockery::mock();
-        $mockLogger->shouldReceive('error')
+        $mockLogger->shouldReceive('info')
             ->once()
             ->withArgs(function ($message) {
                 return str_contains($message, 'from_state=idle') &&

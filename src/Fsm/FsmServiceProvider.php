@@ -70,6 +70,13 @@ class FsmServiceProvider extends ServiceProvider
 
         // Register FSM Replay Service
         $this->app->singleton(Services\FsmReplayService::class);
+
+        // Register FSM History Service with config dependency
+        $this->app->singleton(Services\FsmHistoryService::class, function ($app) {
+            return new Services\FsmHistoryService(
+                $app->make(Repository::class)
+            );
+        });
     }
 
     public function boot(): void

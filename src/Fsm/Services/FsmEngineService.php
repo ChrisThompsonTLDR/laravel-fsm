@@ -489,8 +489,10 @@ class FsmEngineService
             report($metricsException);
         }
         // 11. Dispatch Verb
+        // Instantiate FsmTransitioned directly and fire — avoids PendingEvent hydrate path
+        // which can trigger deserialization with abstract Event type.
         if ($this->config->get('fsm.verbs.dispatch_transitioned_verb', true)) {
-            FsmTransitioned::record(
+            $verb = new FsmTransitioned(
                 modelId: (string) $model->getKey(),
                 modelType: get_class($model),
                 fsmColumn: $columnName,
@@ -498,8 +500,17 @@ class FsmEngineService
                 toState: $toState,
                 result: FsmTransitioned::RESULT_SUCCESS,
                 context: $this->filterContextForLogging($context),
-                transitionEvent: $transitionDef->event
+                transitionEvent: $transitionDef->event,
+                source: $transitionInput->getSource(),
+                metadata: $transitionInput->metadata,
+                occurredAt: now(),
+                priority: FsmTransitioned::PRIORITY_NORMAL,
+                correlationId: null,
+                causationId: null
             );
+            $verb->id = snowflake_id();
+            Verbs::fire($verb);
+            Verbs::commit();
         }
 
         return $model;

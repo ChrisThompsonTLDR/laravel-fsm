@@ -38,7 +38,7 @@ class FsmHistoryServiceTest extends FsmTestCase
     public function test_it_returns_empty_collection_for_model_with_no_history(): void
     {
         $model = TestModel::factory()->create();
-        $service = new FsmHistoryService;
+        $service = $this->app->make(FsmHistoryService::class);
 
         $timeline = $service->getStateTimeline($model, 'status');
 
@@ -66,7 +66,7 @@ class FsmHistoryServiceTest extends FsmTestCase
             'subject_type' => TestUser::class,
         ]);
 
-        $service = new FsmHistoryService;
+        $service = $this->app->make(FsmHistoryService::class);
         $timeline = $service->getStateTimeline($model, 'status');
 
         $this->assertCount(1, $timeline);
@@ -124,7 +124,7 @@ class FsmHistoryServiceTest extends FsmTestCase
             ],
         ]);
 
-        $analysis = (new FsmHistoryService)->getStateTimeAnalysis($model, 'status');
+        $analysis = $this->app->make(FsmHistoryService::class)->getStateTimeAnalysis($model, 'status');
 
         $this->assertCount(3, $analysis);
 
@@ -146,5 +146,89 @@ class FsmHistoryServiceTest extends FsmTestCase
         $this->assertSame(1, $completed->occurrenceCount);
         $this->assertSame(0, $completed->totalDurationMs);
         $this->assertSame(0.0, $completed->averageDurationMs);
+    }
+
+    public function test_custom_fsm_log_model_via_config(): void
+    {
+        // Create a custom FsmLog model class
+        $customLogClass = new class extends FsmLog
+        {
+            protected $table = 'custom_history_logs';
+        };
+
+        // Create the custom table
+        $this->app['db']->connection()->getSchemaBuilder()->create('custom_history_logs', function ($table) {
+            $table->uuid('id')->primary();
+            $table->string('subject_id')->nullable();
+            $table->string('subject_type')->nullable();
+            $table->string('model_type');
+            $table->string('model_id', 255);
+            $table->string('fsm_column');
+            $table->string('from_state')->nullable();
+            $table->string('to_state');
+            $table->string('transition_event')->nullable();
+            $table->json('context_snapshot')->nullable();
+            $table->text('exception_details')->nullable();
+            $table->integer('duration_ms')->nullable();
+            $table->timestampTz('happened_at')->useCurrent();
+            $table->index(['model_type', 'model_id']);
+        });
+
+        // Set the config to use the custom model
+        config(['fsm.models.fsm_log' => get_class($customLogClass)]);
+
+        // Create test data in the custom table
+        $model = TestModel::factory()->create();
+        $happenedAt1 = CarbonImmutable::parse('2024-01-01 12:00:00', 'UTC');
+        $happenedAt2 = CarbonImmutable::parse('2024-01-01 12:01:00', 'UTC');
+
+        // First transition to Pending
+        $customLogClass::create([
+            'model_id' => (string) $model->getKey(),
+            'model_type' => $model->getMorphClass(),
+            'fsm_column' => 'status',
+            'from_state' => '__initial__',
+            'to_state' => TestFeatureState::Pending->value,
+            'transition_event' => 'custom_start',
+            'context_snapshot' => ['custom' => 'data'],
+            'duration_ms' => 999,
+            'happened_at' => $happenedAt1,
+        ]);
+
+        // Second transition to Processing
+        $customLogClass::create([
+            'model_id' => (string) $model->getKey(),
+            'model_type' => $model->getMorphClass(),
+            'fsm_column' => 'status',
+            'from_state' => TestFeatureState::Pending->value,
+            'to_state' => TestFeatureState::Processing->value,
+            'transition_event' => 'start_processing',
+            'context_snapshot' => ['custom' => 'data2'],
+            'duration_ms' => 888,
+            'happened_at' => $happenedAt2,
+        ]);
+
+        // Create a new history service instance with the updated config
+        $service = new FsmHistoryService;
+
+        // Test getStateTimeline with custom model
+        $timeline = $service->getStateTimeline($model, 'status');
+
+        $this->assertCount(2, $timeline);
+        $firstEntry = $timeline->first();
+        $this->assertSame(TestFeatureState::Pending->value, $firstEntry->toState);
+        $this->assertSame('custom_start', $firstEntry->transitionEvent);
+        $this->assertSame(999, $firstEntry->durationMs);
+
+        // Test getStateTimeAnalysis with custom model
+        $analysis = $service->getStateTimeAnalysis($model, 'status');
+        // Should have analysis for Pending (time between first and second transition) and Processing (final state)
+        $this->assertCount(2, $analysis);
+
+        $pendingAnalysis = $analysis->firstWhere('state', TestFeatureState::Pending->value);
+        $this->assertNotNull($pendingAnalysis);
+        $this->assertSame(TestFeatureState::Pending->value, $pendingAnalysis->state);
+        // Duration should be time between happenedAt1 and happenedAt2 (60 seconds = 60000ms)
+        $this->assertSame(60000, $pendingAnalysis->totalDurationMs);
     }
 }
