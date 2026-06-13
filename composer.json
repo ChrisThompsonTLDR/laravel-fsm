@@ -19,6 +19,7 @@
   ],
   "require": {
     "php": "^8.3|^8.4",
+    "composer/class-map-generator": "^1.4",
     "hirethunk/verbs": "^0.7",
     "illuminate/database": "^12.0",
     "illuminate/support": "^12.0",
@@ -27,14 +28,14 @@
   "require-dev": {
     "glhd/bits": "^0.6.1",
     "larastan/larastan": "^3.4.2",
-    "laravel/framework": "12.28.0",
+    "laravel/framework": "^12.60",
     "laravel/pint": "^1.22",
     "mockery/mockery": "^1.6.12",
     "orchestra/testbench": "^10.4",
-    "orchestra/testbench-core": "10.7.0",
-    "pestphp/pest": "4.1.2",
+    "orchestra/testbench-core": "^10.7",
+    "pestphp/pest": "^4.1",
     "phpstan/phpstan": "^2.1",
-    "phpunit/phpunit": "12.4.0"
+    "phpunit/phpunit": "^12.5.8"
   },
   "autoload": {
     "psr-4": {
