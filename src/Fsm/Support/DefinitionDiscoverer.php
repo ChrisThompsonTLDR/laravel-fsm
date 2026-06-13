@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Fsm\Support;
 
-use Composer\Autoload\ClassMapGenerator;
+use Composer\ClassMapGenerator\ClassMapGenerator;
 use Fsm\Contracts\FsmDefinition;
 
 class DefinitionDiscoverer
@@ -22,7 +22,9 @@ class DefinitionDiscoverer
                 continue;
             }
 
-            $classMap = ClassMapGenerator::createMap($path);
+            $generator = new ClassMapGenerator;
+            $generator->scanPaths($path);
+            $classMap = $generator->getClassMap()->getMap();
 
             foreach ($classMap as $class => $file) {
                 try {

@@ -395,8 +395,11 @@ class FsmEngineServiceMutationTest extends TestCase
     {
         // Test with different config scenarios to catch mutations in default value handling
 
-        // Test with null excluded properties (should include all data)
-        $context = new TestContextDto(['sensitive' => 'secret', 'normal' => 'visible']);
+        // Build the context from the DTO's declared property so the data survives
+        // serialization. (argonaut-dto >=1.4 drops array keys that don't map to a
+        // declared property, so passing arbitrary keys here would toArray() to empty
+        // and exercise nothing.)
+        $context = new TestContextDto('sensitive=secret; normal=visible');
         $filtered = $this->service->filterContextForLogging($context);
 
         $this->assertNotNull($filtered, 'Context should be processed - config mutation should be caught');

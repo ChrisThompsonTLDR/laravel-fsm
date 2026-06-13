@@ -411,6 +411,7 @@ class FsmEngineService
             $updated = $model->newQuery()
                 ->whereKey($model->getKey())
                 ->where($columnName, $currentStateValue)
+                // @phpstan-ignore argument.type (the FSM state column is dynamic, not a statically-known model property)
                 ->update([$columnName => $targetStateValue]);
             if ($updated === 0) {
                 throw FsmTransitionFailedException::forConcurrentModification(
