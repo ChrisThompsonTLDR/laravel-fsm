@@ -202,6 +202,12 @@ if ($order->fsm()->can('deliver')) {
     $order->fsm()->trigger('deliver');
 }
 
+// triggerIf() is the safe, idempotent form of the check-then-trigger above:
+// it performs the transition and returns true when it's available, or is a
+// no-op returning false when it isn't — without throwing. Ideal for retryable
+// contexts (e.g. a queued job that may run more than once).
+$didTransition = $order->fsm()->triggerIf('deliver'); // bool
+
 $preview = $order->fsm()->dryRun('cancel');
 // ['can_transition' => true, 'from_state' => 'delivered', 'to_state' => 'cancelled', ...]
 

@@ -122,6 +122,37 @@ trait HasFsm
                 return $this->engine->canTransition($this->model, $this->column, $to, $ctx);
             }
 
+            /**
+             * Trigger the transition only if it is currently available, without
+             * throwing when it is not.
+             *
+             * Returns true and performs the transition when the event maps to a
+             * valid, permitted transition from the current state; otherwise it is a
+             * no-op and returns false. "Not available" covers no matching transition
+             * from the current state and a rejecting guard — and, mirroring can(), a
+             * guard that throws during the availability check is treated as
+             * unavailable (false), not re-raised. This makes triggerIf() safe for
+             * idempotent / retryable contexts — e.g. a queued job that may run more
+             * than once and must not fail by re-firing an already-applied step.
+             *
+             * Errors raised while actually performing an available transition still
+             * propagate: an exception thrown inside a transition action, or an
+             * FsmTransitionFailedException from a lost optimistic-concurrency race in
+             * the small window between the availability check and the transition.
+             */
+            public function triggerIf(FsmEventEnum|string $event, ?ArgonautDTOContract $ctx = null): bool
+            {
+                $to = $this->mapEvent($event);
+
+                if (! $this->engine->canTransition($this->model, $this->column, $to, $ctx)) {
+                    return false;
+                }
+
+                $this->engine->performTransition($this->model, $this->column, $to, $ctx);
+
+                return true;
+            }
+
             public function dryRun(FsmEventEnum|string $event, ?ArgonautDTOContract $ctx = null): array
             {
                 $to = $this->mapEvent($event);
